@@ -4,14 +4,26 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Tab1Page } from './tab1.page';
+import { TaskDetailPage } from './task-detail/task-detail.page';
+import { VisitPage } from './visit/visit.page';
+import { GoVisitPage } from './go-visit/go-visit.page';
+import { AreaPage } from './area/area-page';
+import { VisitDetailpage } from './visit-detail/visit-detail.page';
 
 @NgModule({
   imports: [
     IonicModule,
     CommonModule,
     FormsModule,
-    RouterModule.forChild([{ path: '', component: Tab1Page }])
+    RouterModule.forChild([
+      { path: '', component: Tab1Page },
+      { path: 'task-detail', component: TaskDetailPage },
+      { path: 'visit', component: VisitPage },
+      { path: 'go-visit', component: GoVisitPage },
+      { path: 'area', component: AreaPage },
+      { path: 'visit-detail', component: VisitDetailpage }
+    ])
   ],
-  declarations: [Tab1Page]
+  declarations: [Tab1Page, TaskDetailPage, VisitPage, GoVisitPage, AreaPage, VisitDetailpage]
 })
-export class Tab1PageModule {}
+export class Tab1PageModule { }

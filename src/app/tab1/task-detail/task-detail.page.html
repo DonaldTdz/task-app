@@ -1,0 +1,71 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-title>
+            任务详情
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <ion-list lines="full" style="padding-bottom:0px;">
+        <ion-item style="margin:0px 20px;">
+            <ion-thumbnail slot="start">
+                <ion-img src="assets/icon/icon-tasknor.png"></ion-img>
+            </ion-thumbnail>
+            <ion-label>
+                <h2>除草（技术服务）</h2>
+                <p>2019年3月29日拜访测试</p>
+            </ion-label>
+        </ion-item>
+    </ion-list>
+    <ion-list lines="none" style="padding-bottom:0px; padding-top: 0px;">
+        <ion-item style="padding-left: 32px;padding-right: 32px;">
+            <ion-icon slot="start" name="logo-ionic"></ion-icon>
+            <ion-label style="font-size: 14px;color: gray;">进行中（剩余2天）</ion-label>
+        </ion-item>
+    </ion-list>
+    <div style="margin:0px 20px;">
+        <ion-list-header>
+            <ion-label>进度(已完成0次共2次)</ion-label>
+        </ion-list-header>
+        <ion-progress-bar value="0.2"></ion-progress-bar>
+    </div>
+    <div class="ion-padding">
+        <ion-list lines="inset">
+            <ion-item-sliding>
+                <ion-item style="font-size:14px">
+                    <ion-thumbnail slot="start" style="height:30px;width:30px;">
+                        <ion-img src="assets/icon/calendar.png"></ion-img>
+                    </ion-thumbnail>
+                    <ion-label>开始时间</ion-label>
+                    <ion-note slot="end">2019-3-01</ion-note>
+                </ion-item>
+                <ion-item style="font-size:14px">
+                    <ion-thumbnail slot="start" style="height:30px;width:30px;">
+                        <ion-img src="assets/icon/calendar.png"></ion-img>
+                    </ion-thumbnail>
+                    <ion-label>结束时间</ion-label>
+                    <ion-note slot="end">2019-3-15</ion-note>
+                </ion-item>
+            </ion-item-sliding>
+        </ion-list>
+        <ion-segment>
+            <ion-segment-button checked>
+                <ion-label>待完成</ion-label>
+            </ion-segment-button>
+            <ion-segment-button>
+                <ion-label>已完成</ion-label>
+            </ion-segment-button>
+        </ion-segment>
+        <ion-list lines="none">
+            <ion-list-header>
+                <ion-label>烟农列表（选择烟农去拜访）</ion-label>
+            </ion-list-header>
+            <ion-item (click)="goDetails()">
+                <ion-label>沈星移
+                    <p>王家烟叶生产收购点</p>
+                </ion-label>
+                <ion-note slot="end">已拜访1次共2次</ion-note>
+            </ion-item>
+        </ion-list>
+    </div>
+</ion-content>

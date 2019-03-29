@@ -1,41 +1,86 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Tab One
+      任务拜访
     </ion-title>
   </ion-toolbar>
 </ion-header>
-
 <ion-content>
-    <ion-card class="welcome-card">
-      <ion-img src="/assets/shapes.svg"></ion-img>
-      <ion-card-header>
-        <ion-card-subtitle>Get Started</ion-card-subtitle>
-        <ion-card-title>Welcome to Ionic</ion-card-title>
-      </ion-card-header>
+  <ion-card class="welcome-card">
+    <!-- <ion-card-header style="padding-top:0px;padding-bottom:0px;">
+      <ion-card-title>
+        <ion-grid>
+          <ion-row>
+            <ion-col style="line-height:40px;">
+              杨帆
+            </ion-col>
+            <ion-col>
+              <ion-button style="float:right;">任务下载</ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-title>
       <ion-card-content>
-        <p>Now that your app has been created, you'll want to start building out features and components. Check out some of the resources below for next steps.</p>
-      </ion-card-content>
-    </ion-card>
-    <ion-list lines="none">
-      <ion-list-header>
-        <ion-label>Resources</ion-label>
-      </ion-list-header>
-      <ion-item href="https://ionicframework.com/docs/">
-        <ion-icon slot="start" color="medium" name="book"></ion-icon>
-        <ion-label>Ionic Documentation</ion-label>
-      </ion-item>
-      <ion-item href="https://ionicframework.com/docs/building/scaffolding">
-        <ion-icon slot="start" color="medium" name="build"></ion-icon>
-        <ion-label>Scaffold Out Your App</ion-label>
-      </ion-item>
-      <ion-item href="https://ionicframework.com/docs/layout/structure">
-        <ion-icon slot="start" color="medium" name="grid"></ion-icon>
-        <ion-label>Change Your App Layout</ion-label>
-      </ion-item>
-      <ion-item href="https://ionicframework.com/docs/theming/basics">
-        <ion-icon slot="start" color="medium" name="color-fill"></ion-icon>
-        <ion-label>Theme Your App</ion-label>
-      </ion-item>
-    </ion-list>
+        广元市-软件工程师 </ion-card-content>
+    </ion-card-header> -->
+    <ion-card-header style="padding-top:0px;padding-bottom:0px;">
+      <ion-grid>
+        <ion-row>
+          <ion-col style="line-height:40px;">
+            <ion-card-title>
+              杨帆
+            </ion-card-title>
+            <ion-card-content style="padding: 6px 0px;">
+              广元市-软件工程师
+            </ion-card-content>
+          </ion-col>
+          <ion-col>
+            <ion-button style="float:right;">任务下载</ion-button>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-header>
+
+  </ion-card>
+  <ion-list lines="none">
+    <ion-list-header>
+      <ion-label>当前任务列表</ion-label>
+    </ion-list-header>
+    <ion-item (click)="goDetails()">
+      <ion-avatar slot="start">
+        <img src="assets/icon/warn_y.png">
+      </ion-avatar>
+      <ion-label>
+        <h2>除草（技术服务）</h2>
+        <p>截止时间：2019-3-27 | 剩余2天</p>
+      </ion-label>
+      <ion-avatar style="margin-bottom:0px;" slot="end">
+        <img style="width:30px;height:30px;" src="assets/icon/extra.png">
+      </ion-avatar>
+    </ion-item>
+    <ion-item>
+      <ion-avatar slot="start">
+        <img src="assets/icon/warn_y.png">
+      </ion-avatar>
+      <ion-label>
+        <h2>烘烤（技术服务）</h2>
+        <p>截止时间：2019-3-27 | 剩余2天</p>
+      </ion-label>
+      <ion-avatar style="margin-bottom:0px;" slot="end">
+        <img style="width:30px;height:30px;" src="assets/icon/extra.png">
+      </ion-avatar>
+    </ion-item>
+    <ion-item>
+      <ion-avatar slot="start">
+        <img src="assets/icon/warn_y.png">
+      </ion-avatar>
+      <ion-label>
+        <h2>面积落实（面积落实）</h2>
+        <p>截止时间：2019-3-28 | 剩余3天</p>
+      </ion-label>
+      <ion-avatar style="margin-bottom:0px;" slot="end">
+        <img style="width:30px;height:30px;" src="assets/icon/extra.png">
+      </ion-avatar>
+    </ion-item>
+  </ion-list>
 </ion-content>
