@@ -19,7 +19,8 @@ export class CommonHttpClient {
     baseUrl?: string) {
         this.http = http;
         // this.baseUrl = baseUrl ? baseUrl : "";
-        this.baseUrl = "http://localhost:21021";
+        // this.baseUrl = "http://localhost:21021";
+        this.baseUrl = "http://192.168.1.12:21021";
     }
 
     get(url: string, params?: { [key: string]: string }, showLoading?: boolean): Observable<any> {

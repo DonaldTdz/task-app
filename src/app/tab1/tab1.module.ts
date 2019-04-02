@@ -9,6 +9,7 @@ import { VisitPage } from './visit/visit.page';
 import { GoVisitPage } from './go-visit/go-visit.page';
 import { AreaPage } from './area/area-page';
 import { VisitDetailpage } from './visit-detail/visit-detail.page';
+import { ServicesModule } from 'src/services/services.module';
 
 @NgModule({
   imports: [

@@ -12,12 +12,9 @@ export class OnLineService {
         this._commonhttp = commonhttp;
     }
     getCurrentTask(params: any): Observable<any> {
-        let url_ = "/api/services/app/Shop/GetPaged";
+        let url_ = "/api/services/app/Schedule/GetSyncDataAppTask";
         return this._commonhttp.get(url_, params).pipe(map(data => {
-            const result = new PagedResultDto();
-            result.items = data.items;
-            result.totalCount = data.totalCount;
-            return result;
+            return data.result;
         }));
     }
 }

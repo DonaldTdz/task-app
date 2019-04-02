@@ -35,7 +35,7 @@
             </ion-card-content>
           </ion-col>
           <ion-col>
-            <ion-button style="float:right;">任务下载</ion-button>
+            <ion-button style="float:right;" (click)="downLoad()">任务下载</ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -83,4 +83,6 @@
       </ion-avatar>
     </ion-item>
   </ion-list>
+  <ion-button (click)="search()">任务获取</ion-button>
+  <ion-button (click)="getData()">数据查询</ion-button>
 </ion-content>
