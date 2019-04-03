@@ -12,22 +12,23 @@
                 <ion-img src="assets/icon/icon-tasknor.png"></ion-img>
             </ion-thumbnail>
             <ion-label>
-                <h2>除草（技术服务）</h2>
-                <p>2019年3月29日拜访测试</p>
+                <h2>{{taskDetailDto.taskTitle}}</h2>
+                <p>{{taskDetailDto.scheduleTitle}}</p>
             </ion-label>
         </ion-item>
     </ion-list>
     <ion-list lines="none" style="padding-bottom:0px; padding-top: 0px;">
         <ion-item style="padding-left: 32px;padding-right: 32px;">
             <ion-icon slot="start" name="logo-ionic"></ion-icon>
-            <ion-label style="font-size: 14px;color: gray;">进行中（剩余2天）</ion-label>
+            <ion-label style="font-size: 14px;color: gray;">{{taskDetailDto.statusDesc}}（{{taskDetailDto.extra}}）
+            </ion-label>
         </ion-item>
     </ion-list>
     <div style="margin:0px 20px;">
         <ion-list-header>
-            <ion-label>进度(已完成0次共2次)</ion-label>
+            <ion-label>进度(已完成{{taskDetailDto.completeNum}}次共{{taskDetailDto.visitTotal}}次)</ion-label>
         </ion-list-header>
-        <ion-progress-bar value="0.2"></ion-progress-bar>
+        <ion-progress-bar value="{{percent}}"></ion-progress-bar>
     </div>
     <div class="ion-padding">
         <ion-list lines="inset">
@@ -37,14 +38,14 @@
                         <ion-img src="assets/icon/calendar.png"></ion-img>
                     </ion-thumbnail>
                     <ion-label>开始时间</ion-label>
-                    <ion-note slot="end">2019-3-01</ion-note>
+                    <ion-note slot="end">{{taskDetailDto.beginTime| date:'yyyy-MM-dd'}}</ion-note>
                 </ion-item>
                 <ion-item style="font-size:14px">
                     <ion-thumbnail slot="start" style="height:30px;width:30px;">
                         <ion-img src="assets/icon/calendar.png"></ion-img>
                     </ion-thumbnail>
                     <ion-label>结束时间</ion-label>
-                    <ion-note slot="end">2019-3-15</ion-note>
+                    <ion-note slot="end">{{taskDetailDto.endTime| date:'yyyy-MM-dd'}}</ion-note>
                 </ion-item>
             </ion-item-sliding>
         </ion-list>
@@ -60,11 +61,11 @@
             <ion-list-header>
                 <ion-label>烟农列表（选择烟农去拜访）</ion-label>
             </ion-list-header>
-            <ion-item (click)="goDetails()">
-                <ion-label>沈星移
-                    <p>王家烟叶生产收购点</p>
+            <ion-item *ngFor="let item of taskDetailDto.growers" (click)="goDetails()">
+                <ion-label>{{item.growerName}}
+                    <p>{{item.unitName}}</p>
                 </ion-label>
-                <ion-note slot="end">已拜访1次共2次</ion-note>
+                <ion-note slot="end">已拜访{{item.completeNum}}次共{{item.visitNum}}次</ion-note>
             </ion-item>
         </ion-list>
     </div>

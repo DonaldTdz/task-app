@@ -36,6 +36,7 @@ export class Grower implements IGrower {
     areaScheduleDetailId: string;
     countyCode: number;
     contractNum: number;
+    collectNum: number;
     constructor(data?: IGrower) {
         if (data) {
             for (var property in data) {
@@ -84,6 +85,7 @@ export class Grower implements IGrower {
             this.areaScheduleDetailId = data["areaScheduleDetailId"];
             this.countyCode = data["countyCode"];
             this.contractNum = data["contractNum"];
+            this.collectNum = data["collectNum"];
         }
     }
 
@@ -136,6 +138,7 @@ export class Grower implements IGrower {
         data["areaScheduleDetailId"] = this.areaScheduleDetailId;
         data["countyCode"] = this.countyCode;
         data["contractNum"] = this.contractNum;
+        data["collectNum"] = this.collectNum;
         return data;
     }
 
@@ -178,4 +181,5 @@ export interface IGrower {
     areaScheduleDetailId: string;
     countyCode: number;
     contractNum: number;
+    collectNum: number;
 }

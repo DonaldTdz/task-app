@@ -42,11 +42,23 @@
     </ion-card-header>
 
   </ion-card>
-  <ion-list lines="none">
+  <ion-list lines="none" *ngIf="scheduleTaskDtoList.length > 0">
     <ion-list-header>
       <ion-label>当前任务列表</ion-label>
     </ion-list-header>
-    <ion-item (click)="goDetails()">
+    <ion-item *ngFor="let item of scheduleTaskDtoList" (click)="goDetails(item.id)">
+      <ion-avatar slot="start">
+        <img src="assets/icon/warn_y.png">
+      </ion-avatar>
+      <ion-label>
+        <h2>{{item.title}}</h2>
+        <p>截止时间：{{item.endTime| date:'yyyy-MM-dd'}} | {{item.extra}}</p>
+      </ion-label>
+      <ion-avatar style="margin-bottom:0px;" slot="end">
+        <img style="width:30px;height:30px;" src="assets/icon/extra.png">
+      </ion-avatar>
+    </ion-item>
+    <!-- <ion-item (click)="goDetails()">
       <ion-avatar slot="start">
         <img src="assets/icon/warn_y.png">
       </ion-avatar>
@@ -69,8 +81,8 @@
       <ion-avatar style="margin-bottom:0px;" slot="end">
         <img style="width:30px;height:30px;" src="assets/icon/extra.png">
       </ion-avatar>
-    </ion-item>
-    <ion-item>
+    </ion-item>-->
+    <!-- <ion-item>
       <ion-avatar slot="start">
         <img src="assets/icon/warn_y.png">
       </ion-avatar>
@@ -81,8 +93,13 @@
       <ion-avatar style="margin-bottom:0px;" slot="end">
         <img style="width:30px;height:30px;" src="assets/icon/extra.png">
       </ion-avatar>
-    </ion-item>
+    </ion-item> -->
   </ion-list>
+  <div class="item ddcenter page-margin page-padding" *ngIf="scheduleTaskDtoList.length == 0">
+    <ion-img src="assets/icon/nodata-search.png"></ion-img>
+    <p style="color:gray; margin-top:10px;">没有待拜访的任务</p>
+  </div>
   <ion-button (click)="search()">任务获取</ion-button>
   <ion-button (click)="getData()">数据查询</ion-button>
+  <ion-button (click)="refreshData()">装载数据</ion-button>
 </ion-content>

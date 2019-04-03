@@ -18,7 +18,7 @@ import { ServicesModule } from 'src/services/services.module';
     FormsModule,
     RouterModule.forChild([
       { path: '', component: Tab1Page },
-      { path: 'task-detail', component: TaskDetailPage },
+      { path: 'task-detail/:id', component: TaskDetailPage },
       { path: 'visit', component: VisitPage },
       { path: 'go-visit', component: GoVisitPage },
       { path: 'area', component: AreaPage },

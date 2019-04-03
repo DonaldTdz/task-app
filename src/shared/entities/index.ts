@@ -10,3 +10,4 @@ export * from './grower-area-record';
 export * from './employee';
 export * from './visit-examine';
 export * from './grower-locationLog';
+export * from './schedule-task-dto';
