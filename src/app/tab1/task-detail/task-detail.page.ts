@@ -62,7 +62,6 @@ export class TaskDetailPage implements OnInit {
                                 if (this.taskDetailDto.visitTotal != 0) {
                                     this.percent = this.taskDetailDto.completeNum / this.taskDetailDto.visitTotal;
                                 }
-                                alert(this.percent);
                             }).catch(e => {
                                 alert('进度统计异常信息' + JSON.stringify(e));
                             })
@@ -70,7 +69,7 @@ export class TaskDetailPage implements OnInit {
 
             })
     }
-    goDetails() {
-        this.router.navigate(['/tabs/tab1/visit']);
+    goDetails(id: string) {
+        this.router.navigate(['/tabs/tab1/visit', id]);
     }
 }

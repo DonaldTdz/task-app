@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
 import { OnLineService } from 'src/services/on-line/on-line.service';
-import { Schedule, ScheduleDetail, ScheduleTask, VisitRecord, VisitTask, TaskExamine, Grower, GrowerAreaRecord, GrowerLocationLogs, VisitExamine, ScheduleTaskDto } from 'src/shared/entities';
+import { Schedule, ScheduleDetail, ScheduleTask, VisitRecord, VisitTask, TaskExamine, Grower, GrowerAreaRecord, GrowerLocationLogs, VisitExamine, ScheduleTaskDto, SystemData } from 'src/shared/entities';
 import { CommonHttpClient } from 'src/services/common-httpclient';
 import { ToastController } from '@ionic/angular';
 
@@ -25,6 +25,7 @@ export class Tab1Page {
   visitTaskList: VisitTask[] = [];
   taskExamineList: TaskExamine[] = [];
   scheduleTaskDtoList: ScheduleTaskDto[] = [];
+  systemDataList: SystemData[] = [];
   userId = '1926112826844702';
   curDate: string;
   constructor(private router: Router
@@ -141,6 +142,12 @@ export class Tab1Page {
               alert('taskExamine' + JSON.stringify(e));
             })
         })
+        this.systemDataList.forEach(v => {
+          db.executeSql('INSERT INTO systemData(id,modelId,type,code,desc,remark,seq,creationTime) VALUES(?,?,?,?,?,?,?,?)'
+            , [v.id, v.modelId, v.type, v.code, v.desc, v.remark, v.seq, v.creationTime]).catch(e => {
+              alert('systemData' + JSON.stringify(e));
+            })
+        })
       }).then(() => {
         this.toastController.create({
           color: 'dark',
@@ -207,6 +214,7 @@ export class Tab1Page {
       this.visitRecordList = VisitRecord.fromJSArray(result.visitRecordList);
       this.visitTaskList = VisitTask.fromJSArray(result.visitTaskList);
       this.taskExamineList = TaskExamine.fromJSArray(result.taskExamineList);
+      this.systemDataList = SystemData.fromJSArray(result.systemDataList);
       alert(JSON.stringify(this.growerList));
       // alert(result);
       console.log(this.scheduleList);
@@ -231,8 +239,8 @@ export class Tab1Page {
       .then((db: SQLiteObject) => {
         db.executeSql('select * from grower', [])
           .then((res) => {
-            alert(JSON.stringify(res));
-            alert(res.rows.item(0).name);
+            // alert(JSON.stringify(res.rows.item(0)));
+            // alert(res.rows.item(0));
           }).catch(e => {
             alert('123' + JSON.stringify(e));
           })

@@ -61,7 +61,7 @@
             <ion-list-header>
                 <ion-label>烟农列表（选择烟农去拜访）</ion-label>
             </ion-list-header>
-            <ion-item *ngFor="let item of taskDetailDto.growers" (click)="goDetails()">
+            <ion-item *ngFor="let item of taskDetailDto.growers" (click)="goDetails(item.id)">
                 <ion-label>{{item.growerName}}
                     <p>{{item.unitName}}</p>
                 </ion-label>

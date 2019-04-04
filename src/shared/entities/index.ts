@@ -11,3 +11,7 @@ export * from './employee';
 export * from './visit-examine';
 export * from './grower-locationLog';
 export * from './schedule-task-dto';
+export * from './system-data';
+export * from './visit-record-dto';
+export * from './visit-record-input-dto';
+export * from './task-examine-dto';

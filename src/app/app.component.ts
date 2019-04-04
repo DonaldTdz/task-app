@@ -51,6 +51,8 @@ export class AppComponent {
             db.executeSql('create table if not exists growerAreaRecords(id varchar(36) PRIMARY KEY not null,growerId int not null,scheduleDetailId varchar(36) not null,imgPath nvarchar(500),longitude decimal(11,8),latitude decimal(11,8),location nvarchar(200),employeeName nvarchar(200),employeeId nvarchar(200),collectionTime DateTime,area decimal(18,2),remark nvarchar(200));', [])
           }).then(() => {
             db.executeSql('create table if not exists growerLocationLogs(id varchar(36) PRIMARY KEY not null,employeeId nvarchar(200),growerId int not null,longitude decimal(2,0),latitude decimal(2,0),creationTime DateTime);', [])
+          }).then(() => {
+            db.executeSql('CREATE TABLE IF NOT EXISTS systemData (id VARCHAR ( 36 ) PRIMARY KEY NOT NULL,modelId INT,type INT NOT NULL,code nvarchar ( 50 ) NOT NULL,DESC nvarchar ( 500 ),remark nvarchar ( 500 ),seq INT,creationTime DateTime );', [])
           })
       });
     }

@@ -1,4 +1,4 @@
-export class Grower implements IGrower {
+export class Grower {
     id: string;
     year: number;
     unitCode: string;
@@ -37,7 +37,8 @@ export class Grower implements IGrower {
     countyCode: number;
     contractNum: number;
     collectNum: number;
-    constructor(data?: IGrower) {
+    limitNum: number = 3;
+    constructor(data?: any) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -86,6 +87,7 @@ export class Grower implements IGrower {
             this.countyCode = data["countyCode"];
             this.contractNum = data["contractNum"];
             this.collectNum = data["collectNum"];
+            this.limitNum = data["limitNum"];
         }
     }
 
@@ -139,6 +141,7 @@ export class Grower implements IGrower {
         data["countyCode"] = this.countyCode;
         data["contractNum"] = this.contractNum;
         data["collectNum"] = this.collectNum;
+        data["limitNum"] = this.limitNum;
         return data;
     }
 
@@ -148,38 +151,4 @@ export class Grower implements IGrower {
         result.init(json);
         return result;
     }
-}
-export interface IGrower {
-    id: string;
-    year: number;
-    unitCode: string;
-    unitName: string;
-    name: string;
-    areaCode: number;
-    employeeId: string;
-    employeeName: string;
-    contractNo: string;
-    villageGroup: string;
-    tel: string;
-    address: string;
-    type: number;
-    plantingArea: string;
-    longitude: number;
-    latitude: number;
-    contractTime: string;
-    isEnable: boolean;
-    isDeleted: boolean;
-    creationTime: Date;
-    creatorUserId: number;
-    lastModificationTime: Date;
-    lastModifierUserId: number;
-    deletionTime: Date;
-    deleterUserId: number;
-    visitNum: number;
-    checked: boolean
-    scheduleDetailId: string;
-    areaScheduleDetailId: string;
-    countyCode: number;
-    contractNum: number;
-    collectNum: number;
 }
