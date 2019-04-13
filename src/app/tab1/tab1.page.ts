@@ -187,14 +187,14 @@ export class Tab1Page {
           //  alert(JSON.stringify(gl));
           if (gl.rows.length > 0) {
             //  alert('growerLocationLogs 2');
-            db.executeSql('update growerLocationLogs set employeeId=?,growerId=?,longitude=?,latitude=?,creationTime=? where id=?'
-              , [v.employeeId, v.growerId, v.longitude, v.latitude, v.creationTime, v.id]).catch(e => {
+            db.executeSql('update growerLocationLogs set employeeId=?,growerId=?,longitude=?,latitude=?,creationTime=?,isOnline= ? where id=?'
+              , [v.employeeId, v.growerId, v.longitude, v.latitude, v.creationTime, v.id, 1]).catch(e => {
                 alert('growerLocationLogs更新异常' + JSON.stringify(e));
               })
           } else {
             //  alert('growerLocationLogs 3');
-            db.executeSql('INSERT INTO growerLocationLogs(id,employeeId,growerId,longitude,latitude,creationTime) VALUES(?,?,?,?,?,?)'
-              , [v.id, v.employeeId, v.growerId, v.longitude, v.latitude, v.creationTime]).catch(e => {
+            db.executeSql('INSERT INTO growerLocationLogs(id,employeeId,growerId,longitude,latitude,creationTime,isOnline) VALUES(?,?,?,?,?,?,?)'
+              , [v.id, v.employeeId, v.growerId, v.longitude, v.latitude, v.creationTime, 1]).catch(e => {
                 alert('growerLocationLogs插入异常' + JSON.stringify(e));
               })
           }
@@ -366,7 +366,7 @@ export class Tab1Page {
     // alert(this.growerList);
   }
   async test() {
-    alert('finally');
+    // alert('finally');
   }
 
   getData() {

@@ -4,32 +4,43 @@ import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
 import { VisitGrowerDetailDto } from 'src/shared/entities/visit-grower-detail-dto';
 import * as moment from 'moment';
 import { VisitRecordDto, Grower } from 'src/shared/entities';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
+import { GaoDeLocation, PositionOptions } from '@ionic-native/gao-de-location/ngx';
+const uuidv1 = require('uuid/v1');
+// import { Geofence } from '@ionic-native/geofence/ngx';
 
 @Component({
     selector: 'visit',
     templateUrl: 'visit.page.html',
-    styleUrls: ['visit.page.scss']
+    styleUrls: ['visit.page.scss'],
+    providers: [GaoDeLocation]
 })
 export class VisitPage {
     id: string;
     isGetPosition: boolean = false;
     showPosition: boolean = false;
-    longitude = 0;
-    latitude = 0;
+    plongitude = 0;
+    platitude = 0;
     lastNum = null;
     visitGrowerDetailDto: VisitGrowerDetailDto = new VisitGrowerDetailDto();
+    userId = '1926112826844702';
+    signRange: any;
     constructor(private router: Router
         , private actRouter: ActivatedRoute
         , private sqlite: SQLite
         , public alertController: AlertController
+        , private gaoDeLocation: GaoDeLocation
+        , private toastController: ToastController
+        // , private geofence: Geofence
     ) {
         this.id = this.actRouter.snapshot.params['id'];
+        // geofence.initialize().then(
+        //     // resolved promise does not return a value
+        //     () => alert('Geofence Plugin Ready'),
+        //     (err) => alert(JSON.stringify(err))
+        // )
     }
 
-    // ngOnInit(): void {
-    //     this.getVisitGrowerDetail();
-    // }
     ionViewWillEnter() {
         this.getVisitGrowerDetail();
     }
@@ -68,8 +79,8 @@ export class VisitPage {
                                         this.lastNum = this.visitGrowerDetailDto.growerInfo.limitNum - this.visitGrowerDetailDto.growerInfo.collectNum >= 0 ? this.visitGrowerDetailDto.growerInfo.limitNum - this.visitGrowerDetailDto.growerInfo.collectNum : 0;
                                         if (this.visitGrowerDetailDto.growerInfo.longitude && this.visitGrowerDetailDto.growerInfo.latitude) {
                                             this.isGetPosition = true;
-                                            this.longitude = this.visitGrowerDetailDto.growerInfo.longitude;
-                                            this.latitude = this.visitGrowerDetailDto.growerInfo.latitude;
+                                            // this.longitude = this.visitGrowerDetailDto.growerInfo.longitude;
+                                            // this.latitude = this.visitGrowerDetailDto.growerInfo.latitude;
                                         }
                                         if (this.visitGrowerDetailDto.growerInfo.collectNum < this.visitGrowerDetailDto.growerInfo.limitNum || !this.visitGrowerDetailDto.growerInfo.longitude || !this.visitGrowerDetailDto.growerInfo.latitude) {
                                             this.showPosition = true;
@@ -107,8 +118,8 @@ export class VisitPage {
                                                         }
                                                         else {
                                                             if (r.rows.item(i).imgPath.indexOf(',') != -1) {
-                                                                alert(-1);
-                                                                // r.rows.item(i).imgPath = r.rows.item(i).imgPath.split(',')[0];
+                                                                // alert(-1);
+                                                                r.rows.item(i).imgPath = r.rows.item(i).imgPath.split(',')[0];
                                                             }
                                                         }
                                                         this.visitGrowerDetailDto.visitRecords.push(VisitRecordDto.fromJS(r.rows.item(i)));
@@ -215,4 +226,108 @@ export class VisitPage {
         });
         await alert.present();
     }
+
+    async location() {
+        const alert = await this.alertController.create({
+            header: '确认!',
+            message: '每年最多能采集' + this.visitGrowerDetailDto.growerInfo.limitNum + '次',
+            buttons: [
+                {
+                    text: '取消',
+                    role: 'cancel',
+                    cssClass: 'secondary',
+                }, {
+                    text: '确定',
+                    handler: () => {
+                        this.getPosition();
+                    }
+                }
+            ]
+        });
+        await alert.present();
+    }
+
+    getPosition() {
+        this.gaoDeLocation.getCurrentPosition().then(async (res: PositionOptions) => {
+            this.platitude = res.latitude;
+            this.plongitude = res.longitude;
+            const alert = await this.alertController.create({
+                header: '定位成功',
+                message: `当前经纬度${res.longitude, res.latitude}`,
+                buttons: ['确定']
+            });
+            await alert.present();
+        }).catch((error) => {
+            alert('定位失败，请尝试开启权限或在露天场所再次尝试');
+        }).then(() => {
+            this.sqlite.create({
+                name: 'taskDB.db',
+                location: 'default'
+            }).then((db: SQLiteObject) => {
+                var curTime = new Date().toISOString();
+                const id = uuidv1();
+                db.executeSql('INSERT INTO growerLocationLogs(id,employeeId,growerId,longitude,latitude,creationTime,isOnline) VALUES(?,?,?,?,?,?)'
+                    , [id, this.userId, this.visitGrowerDetailDto.growerId, this.plongitude, this.platitude, curTime, 0]).catch(e => {
+                        alert('采集位置创建异常' + JSON.stringify(e));
+                    }).then(() => {
+                        this.toastController.create({
+                            color: 'dark',
+                            duration: 3e10,
+                            message: '保存成功',
+                            showCloseButton: false,
+                            position: 'middle'
+                        }).then(toast => {
+                            toast.present();
+                        })
+                    })
+            })
+        })
+    }
+
+    // validateLocation(latGrower: any, lonGrower: any, empId: string, growerId: any) {
+    //     this.gaoDeLocation.getCurrentPosition().then(async (res: PositionOptions) => {
+    //         const alert = await this.alertController.create({
+    //             header: '定位成功',
+    //             message: `当前经纬度${res.longitude, res.latitude}`,
+    //             buttons: ['确定']
+    //         });
+    //         await alert.present();
+    //     }).catch((error) => {
+    //         alert('定位失败，请尝试开启权限或在露天场所再次尝试');
+    //     }).then(() => {
+    //         this.sqlite.create({
+    //             name: 'taskDB.db',
+    //             location: 'default'
+    //         }).then((db: SQLiteObject) => {
+    //             db.executeSql('select s.[Desc] desc from systemData s where s.ModelId =2 and s.Type =5 and s.Code = "SignRange"', []).then((res) => {
+    //                 this.signRange = res.rows.item(0).desc;
+    //             }).catch((e) => {
+    //                 alert('烟农采集位置条件获取失败' + JSON.stringify(e));
+    //             })
+    //         })
+    //     })
+    // }
+
+    //范围判断
+    // private addGeofence() {
+    //     //options describing geofence
+    //     let fence = {
+    //       id: uuidv1(), //any unique ID
+    //       latitude:       37.285951, //center of geofence radius
+    //       longitude:      -121.936650,
+    //       radius:         100, //radius to edge of geofence in meters
+    //       transitionType: 1, //see 'Transition Types' below
+    //       notification: { //notification settings
+    //           id:             1, //any unique ID
+    //           title:          'You crossed a fence', //notification title
+    //           text:           'You just arrived to Gliwice city center.', //notification body
+    //           openAppOnClick: true //open app when notification is tapped
+    //       }
+    //     }
+
+    //     this.geofence.addOrUpdate(fence).then(
+    //        () => console.log('Geofence added'),
+    //        (err) => console.log('Geofence failed to add')
+    //      );
+    //   }
 }

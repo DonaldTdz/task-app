@@ -101,8 +101,9 @@ export class Tab2Page {
       await this.sqlite.create({
         name: 'taskDB.db',
         location: 'default'
-      }).then(async (db: SQLiteObject) => {
-        await db.executeSql('select * from scheduleDetail where id =?', [this.list[i].id]).then(async (sd) => {
+      }).then((db: SQLiteObject) => {
+        db.executeSql('select * from scheduleDetail where id =?', [this.list[i].id]).then(async (sd) => {
+          await alert('查询数据');
           if (sd.rows.length > 0) {
             // alert(2);
             for (var i = 0; i < sd.rows.length; i++) {
@@ -152,16 +153,36 @@ export class Tab2Page {
               });
             }
             // alert(JSON.stringify(this.scheduleDetailList));
+            await db.executeSql('select * from growerLocationLogs where isOnline = 0', []).then((gll) => {
+              if (gll.rows.length > 0) {
+                for (var i = 0; i < gll.rows.length; i++) {
+                  this.growerLocationLogList.push(GrowerLocationLogs.fromJS(gll.rows.item(i)));
+                }
+              }
+            }).catch((e) => {
+              alert('采集位置查询失败' + JSON.stringify(e));
+            })
           }
           // alert(JSON.stringify('计划明细' + this.scheduleDetailList));
         }).catch((e) => {
           alert('计划详情查询失败' + JSON.stringify(e));
         })
-
-      }).then(async v => {
-        // alert('all');
-        await this.returnServer();
       });
+      await alert(i);
+      this.returnServer().then(() => {
+        if (this.list.length - 1 == i) {
+          // this.refreshData();
+        }
+      });
+      // .then(async v => {
+      //   // alert('all');
+      //   await alert(i);
+      //   await this.returnServer().then(() => {
+      //     if (this.list.length - 1 == i) {
+      //       this.refreshData();
+      //     }
+      //   });
+      // })
     }
     // await this.refreshData();
     // alert('finally');
@@ -169,13 +190,15 @@ export class Tab2Page {
 
   async upload() {
     this.loading = true;
-    await this.getData().then(() => {
-      this.refreshData();
-    });
+    await this.getData()
+    // .then(() => {
+    //   alert('最后一次');
+    // });
     // await this.refreshData();
   }
 
   async returnServer() {
+    alert('进来删除几次');
     //执行完毕数据回传
     let params: any = {};
     params.VisitExamineList = this.visitExamineList;
@@ -183,9 +206,14 @@ export class Tab2Page {
     params.GrowerAreaRecordList = this.growerAreaRecordList;
     params.VisitRecordList = this.visitRecordList;
     params.GrowerList = this.growerList;
+    params.GrowerLocationLogList = this.growerLocationLogList;
+    params.EmployeeId = this.userId;
     // alert(JSON.stringify(this.scheduleDetailList));
     // alert(JSON.stringify(this.growerList));
     // alert(JSON.stringify(this.growerAreaRecordList));
+    // alert(JSON.stringify(this.growerLocationLogList));
+    // alert(JSON.stringify(this.visitRecordList));
+    // alert(JSON.stringify(params));
     this.onLineService.uploadData(params).subscribe((result: ApiResult) => {
       if (result.code === 901) {
         //delete 删拜访考核项-拜访记录and面积落实记录-计划详情
@@ -193,13 +221,14 @@ export class Tab2Page {
           name: 'taskDB.db',
           location: 'default'
         }).then(async (db: SQLiteObject) => {
+          await alert('进入删除状态');
           for (var i = 0; i < this.visitExamineList.length; i++) {
             await db.executeSql('delete from visitExamine where id =?', [this.visitExamineList[i].id]).then((ve) => {
               // alert(JSON.stringify(ve));
             }).catch(e => {
               alert('考核项删除异常' + JSON.stringify(e));
             })
-            alert(1);
+            // alert(1);
           }
           for (var i = 0; i < this.visitRecordList.length; i++) {
             await db.executeSql('delete from visitRecord where id =?', [this.visitRecordList[i].id]).then((vr) => {
@@ -207,7 +236,7 @@ export class Tab2Page {
             }).catch(e => {
               alert('拜访记录删除异常' + JSON.stringify(e));
             })
-            alert(2);
+            // alert(2);
           }
           for (var i = 0; i < this.growerAreaRecordList.length; i++) {
             await db.executeSql('delete from growerAreaRecords where id =?', [this.growerAreaRecordList[i].id]).then((gar) => {
@@ -215,17 +244,50 @@ export class Tab2Page {
             }).catch(e => {
               alert('面积落实记录删除异常' + JSON.stringify(e));
             })
-            alert(3);
+            // alert(3);
           }
           for (var i = 0; i < this.scheduleDetailList.length; i++) {
-            await db.executeSql('delete from scheduleDetail where id =?', [this.scheduleDetailList[i].id]).then((sd) => {
-              // alert(JSON.stringify(sd));
+            await db.executeSql('delete from scheduleDetail where id =?', [this.scheduleDetailList[i].id]).then(async (sd) => {
+              await alert('删除数据' + JSON.stringify(sd));
             }).catch(e => {
               alert('计划详情记录删除异常' + JSON.stringify(e));
             })
-            alert(4);
+            // alert(4);
           }
-        }).then(async () => {
+          // alert('进入删除状态');
+          // for (var i = 0; i < this.visitExamineList.length; i++) {
+          //   db.executeSql('delete from visitExamine where id =?', [this.visitExamineList[i].id]).then((ve) => {
+          //     // alert(JSON.stringify(ve));
+          //   }).catch(e => {
+          //     alert('考核项删除异常' + JSON.stringify(e));
+          //   })
+          //   // alert(1);
+          // }
+          // for (var i = 0; i < this.visitRecordList.length; i++) {
+          //   db.executeSql('delete from visitRecord where id =?', [this.visitRecordList[i].id]).then((vr) => {
+          //     // alert(JSON.stringify(vr));
+          //   }).catch(e => {
+          //     alert('拜访记录删除异常' + JSON.stringify(e));
+          //   })
+          //   // alert(2);
+          // }
+          // for (var i = 0; i < this.growerAreaRecordList.length; i++) {
+          //   db.executeSql('delete from growerAreaRecords where id =?', [this.growerAreaRecordList[i].id]).then((gar) => {
+          //     // alert(JSON.stringify(gar));
+          //   }).catch(e => {
+          //     alert('面积落实记录删除异常' + JSON.stringify(e));
+          //   })
+          //   // alert(3);
+          // }
+          // for (var i = 0; i < this.scheduleDetailList.length; i++) {
+          //   db.executeSql('delete from scheduleDetail where id =?', [this.scheduleDetailList[i].id]).then((sd) => {
+          //     alert('删除数据' + JSON.stringify(sd));
+          //   }).catch(e => {
+          //     alert('计划详情记录删除异常' + JSON.stringify(e));
+          //   })
+          // alert(4);
+          // }
+        }).then(() => {
           this.loading = false;
           this.toastController.create({
             color: 'dark',
@@ -233,7 +295,7 @@ export class Tab2Page {
             message: '数据上传成功',
             showCloseButton: false,
             position: 'middle'
-          }).then(async toast => {
+          }).then(toast => {
             toast.present();
           }).then(() => {
             this.num++;

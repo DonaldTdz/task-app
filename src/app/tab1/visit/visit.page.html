@@ -109,7 +109,8 @@
                 (click)="subArea()">提交落实面积
             </ion-button>
         </div>
-        <ion-button *ngIf="showPosition" color="light" expand="block">采集烟农位置{{lastNum==0?'':'(剩余'+lastNum+'次)'}}
+        <ion-button *ngIf="showPosition" (click)="location()" color="light" expand="block">
+            采集烟农位置{{lastNum==0?'':'(剩余'+lastNum+'次)'}}
         </ion-button>
     </div>
 </ion-content>

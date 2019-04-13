@@ -5,12 +5,13 @@ import { VisitRecordInputDto, TaskExamineDto, ScheduleDetail } from 'src/shared/
 import { AlertController, ToastController, NavController } from '@ionic/angular';
 const uuidv1 = require('uuid/v1');
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
+import { GaoDeLocation, PositionOptions } from '@ionic-native/gao-de-location/ngx';
 
 @Component({
     selector: 'go-visit',
     templateUrl: 'go-visit.page.html',
     styleUrls: ['go-visit.page.scss'],
-    providers: [Camera]
+    providers: [Camera, GaoDeLocation]
 })
 export class GoVisitPage {
     id: string;
@@ -21,6 +22,7 @@ export class GoVisitPage {
     scheduleDetail: ScheduleDetail = new ScheduleDetail();
     visitRecordInputDto: VisitRecordInputDto = new VisitRecordInputDto();
     photos = [];
+    showMessage = '正在获取,请耐心等待...';
 
     constructor(private actRouter: ActivatedRoute
         , private sqlite: SQLite
@@ -28,12 +30,38 @@ export class GoVisitPage {
         , private toastController: ToastController
         , public navCtrl: NavController
         , private camera: Camera
+        , private gaoDeLocation: GaoDeLocation
     ) {
         this.id = this.actRouter.snapshot.params['id'];
     }
 
     ngOnInit(): void {
         this.getInitInfo();
+        this.location();
+    }
+
+    location() {
+        this.showMessage = '正在获取,请耐心等待...';
+        this.gaoDeLocation.getCurrentPosition()
+            .then(async (res: PositionOptions) => {
+                if (res.status == '定位失败') {
+                    this.showMessage = '定位失败,请重新定位...';
+                    alert('定位失败，请尝试开启权限或在露天场所再次尝试');
+                } else {
+                    // alert(JSON.stringify(res));
+                    this.visitRecordInputDto.latitude = res.latitude;
+                    this.visitRecordInputDto.longitude = res.longitude;
+                    this.showMessage = `当前经纬度${res.longitude.toFixed(3)},${res.latitude.toFixed(3)}`;
+                    const alert = await this.alertController.create({
+                        header: '定位成功',
+                        message: `当前经纬度${res.longitude.toFixed(3)},${res.latitude.toFixed(3)}`,
+                        buttons: ['确定']
+                    });
+                    await alert.present();
+                }
+            }).catch((error) => {
+                alert('定位失败，请尝试开启权限或在露天场所再次尝试');
+            });
     }
 
     async goCamera() {
@@ -101,20 +129,25 @@ export class GoVisitPage {
             this.visitRecordInputDto.desc = '';
         }
         //验证
-        // if (this.data.location == '') {
-        //     dd.alert({ title: '亲', content:'请获取位置信息', buttonText: '确定' });
-        //     return;
-        //   }
+        if (!this.visitRecordInputDto.latitude) {
+            const alert = await this.alertController.create({
+                header: '亲',
+                message: '请获取位置信息',
+                buttons: ['确定']
+            });
+            await alert.present();
+            return;
+        }
         // const imgstrs = this.getImgPaths(this.data.imgPaths, 1);
-        // if (this.visitRecordInputDto.imgPath.length == 0) {
-        //     const alert = await this.alertController.create({
-        //         header: '亲',
-        //         message: '请上传拍照',
-        //         buttons: ['确定']
-        //     });
-        //     await alert.present();
-        //     return;
-        // }
+        if (this.visitRecordInputDto.imgPath.length == 0) {
+            const alert = await this.alertController.create({
+                header: '亲',
+                message: '请上传拍照',
+                buttons: ['确定']
+            });
+            await alert.present();
+            return;
+        }
         // this.data.imgPath = imgstrs;
         // alert(this.visitRecordInputDto.desc.length);
         for (var i in this.visitRecordInputDto.examines) {
@@ -145,7 +178,7 @@ export class GoVisitPage {
             const vrId = uuidv1();
             // alert(this.visitRecordInputDto.imgPath);
             db.executeSql('INSERT INTO visitRecord(id,scheduleDetailId,employeeId,growerId,signTime,location,longitude,latitude,desc,imgPath,creationTime,isOnline) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
-                , [vrId, this.id, this.visitRecordInputDto.employeeId, this.visitRecordInputDto.growerId, currentTime, '', '', '', this.visitRecordInputDto.desc, this.visitRecordInputDto.imgPath, currentTime, 0])
+                , [vrId, this.id, this.visitRecordInputDto.employeeId, this.visitRecordInputDto.growerId, currentTime, '', this.visitRecordInputDto.longitude, this.visitRecordInputDto.latitude, this.visitRecordInputDto.desc, this.visitRecordInputDto.imgPath, currentTime, 0])
                 .then(() => {
                     this.visitRecordInputDto.examines.forEach(v => {
                         // alert('INSERT');

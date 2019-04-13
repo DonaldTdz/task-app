@@ -15,9 +15,10 @@
                 <h6>沈星移</h6>
             </ion-note>
         </ion-item>
-        <ion-item>
+        <ion-item (click)="location()">
             <ion-label>
                 <h2 style="color:rgb(135,167,214);">点击获取所在位置</h2>
+                <p>{{showMessage}}</p>
             </ion-label>
             <ion-avatar style="margin-bottom:0px;" slot="start">
                 <img style="width:30px;height:30px;" src="assets/icon/location.png">
