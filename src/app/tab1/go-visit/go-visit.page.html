@@ -34,9 +34,16 @@
                 <h2>拍照</h2>
                 <p>最多可采集3张照片</p>
             </ion-label>
-            <ion-avatar style="margin-bottom:0px;" slot="end">
+            <ion-avatar (click)="goCamera()" style="margin-bottom:0px;" slot="end">
                 <img style="width:30px;height:30px;" src="assets/icon/photo.png">
             </ion-avatar>
+        </ion-item>
+    </ion-list>
+    <ion-list lines="none" *ngIf="photos.length>0">
+        <ion-item>
+            <ion-col style="margin:0px;padding:0px;" *ngFor="let item of photos">
+                <ion-img style="width:60px;height:60px;" [src]="'data:image/jpeg;base64,'+ item"></ion-img>
+            </ion-col>
         </ion-item>
     </ion-list>
     <ion-list lines="none">
@@ -45,42 +52,42 @@
                 <h2>考核列表</h2>
             </ion-label>
         </ion-item>
-        <ion-radio-group *ngFor="let item of visitRecordInputDto.examines; let i = index">
+        <ion-radio-group *ngFor="let item of visitRecordInputDto.examines; let i = index" [(ngModel)]="item.score">
             <ion-list-header>
                 <ion-label>{{i+1}}.{{item.name}}（{{item.desc}}）</ion-label>
             </ion-list-header>
             <div *ngIf="item.examineOption == 1">
                 <ion-item>
                     <ion-label>优</ion-label>
-                    <ion-radio slot="start" value="{{index}}-5" checked="{{item.score == 5}}"></ion-radio>
+                    <ion-radio slot="start" value=5 checked="{{item.score == 5}}"></ion-radio>
                 </ion-item>
                 <ion-item>
                     <ion-label>合格</ion-label>
-                    <ion-radio slot="start" value="{{index}}-3" checked="{{item.score == 3}}"></ion-radio>
+                    <ion-radio slot="start" value=3 checked="{{item.score == 3}}"></ion-radio>
                 </ion-item>
                 <ion-item>
                     <ion-label>差</ion-label>
-                    <ion-radio slot="start" value="{{index}}-1" checked="{{item.score == 1}}"></ion-radio>
+                    <ion-radio slot="start" value=1 checked="{{item.score == 1}}"></ion-radio>
                 </ion-item>
             </div>
             <div *ngIf="item.examineOption == 2">
                 <ion-item>
                     <ion-label>到位</ion-label>
-                    <ion-radio slot="start" value="{{index}}-5" checked="{{item.score == 5}}"></ion-radio>
+                    <ion-radio slot="start" value=5 checked="{{item.score == 5}}"></ion-radio>
                 </ion-item>
                 <ion-item>
                     <ion-label>不到位</ion-label>
-                    <ion-radio slot="start" value="{{index}}-1" checked="{{item.score == 3}}"></ion-radio>
+                    <ion-radio slot="start" value=1 checked="{{item.score == 3}}"></ion-radio>
                 </ion-item>
             </div>
             <div *ngIf="item.examineOption == 3">
                 <ion-item>
                     <ion-label>了解</ion-label>
-                    <ion-radio slot="start" value="{{index}}-5" checked="{{item.score == 5}}"></ion-radio>
+                    <ion-radio slot="start" value=5 checked="{{item.score == 5}}"></ion-radio>
                 </ion-item>
                 <ion-item>
                     <ion-label>不了解</ion-label>
-                    <ion-radio slot="start" value="{{index}}-1" checked="{{item.score == 3}}"></ion-radio>
+                    <ion-radio slot="start" value=1 checked="{{item.score == 3}}"></ion-radio>
                 </ion-item>
             </div>
         </ion-radio-group>
@@ -105,10 +112,11 @@
     <ion-list lines="none">
         <ion-item>
             <ion-label position="stacked">备注</ion-label>
-            <ion-textarea maxlength=500 placeholder="备注"></ion-textarea>
+            <ion-textarea [(ngModel)]="visitRecordInputDto.desc" maxlength=500 placeholder="备注">
+            </ion-textarea>
         </ion-item>
     </ion-list>
     <div>
-        <ion-button expand="block">提交</ion-button>
+        <ion-button expand="block" (click)="save()">提交</ion-button>
     </div>
 </ion-content>

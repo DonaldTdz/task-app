@@ -11,7 +11,8 @@ export class TaskDetailDto {
     visitTotal: number;
     beginTime: Date;
     growers: TaskGrowerDto[] = [];
-    completeGrowers: TaskGrowerDto[] = [];
+    completeGrowersDto: TaskGrowerDto[] = [];
+    unCompleteGrowersDto: TaskGrowerDto[] = [];
 
     get taskTitle() {
         return this.taskName + "（" + this.taskTypeName + "）";
@@ -32,7 +33,7 @@ export class TaskDetailDto {
     get endDay() {
         if (this.endTime) {
             const endtime = moment(this.endTime);
-            return endtime.diff(moment(), 'days') + 1;
+            return endtime.diff(moment(), 'days');
         }
     }
 
@@ -57,6 +58,24 @@ export class TaskDetailDto {
         } else {
             return '其他';
         }
+    }
+
+    get completeGrowers() {
+        this.growers.forEach((v) => {
+            if (v.visitNum == v.completeNum) {
+                this.completeGrowersDto.push(v);
+            }
+        })
+        return this.completeGrowersDto;
+    }
+
+    get unCompleteGrowers() {
+        this.growers.forEach((v) => {
+            if (v.status != 0 && v.completeNum < v.visitNum) {
+                this.unCompleteGrowersDto.push(v);
+            }
+        })
+        return this.unCompleteGrowersDto;
     }
 
     constructor(data?: any) {

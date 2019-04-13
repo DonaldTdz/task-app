@@ -19,7 +19,7 @@ export class ScheduleTaskDto {
     get endDay() {
         if (this.endTime) {
             const endtime = moment(this.endTime);
-            return endtime.diff(moment(), 'days') + 1;
+            return endtime.diff(moment(), 'days');
         }
     }
 

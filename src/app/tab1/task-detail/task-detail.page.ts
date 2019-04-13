@@ -13,6 +13,7 @@ export class TaskDetailPage implements OnInit {
     taskDetailDto: TaskDetailDto = new TaskDetailDto();
     percent: number = 0;
     userId = '1926112826844702';
+    isComplete: boolean = false;
     constructor(private router: Router
         , private actRouter: ActivatedRoute
         , private sqlite: SQLite
@@ -23,6 +24,21 @@ export class TaskDetailPage implements OnInit {
     ngOnInit(): void {
         this.getTaskDetail();
     }
+
+    segmentButtonClicked(type: any) {
+        if (type == 1) {
+            this.taskDetailDto.completeGrowersDto = [];
+            this.isComplete = true;
+            this.taskDetailDto.completeGrowers;
+            // alert(JSON.stringify(this.taskDetailDto.completeGrowers));
+        } else {
+            this.taskDetailDto.unCompleteGrowersDto = [];
+            this.isComplete = false;
+            this.taskDetailDto.unCompleteGrowers;
+            // alert(JSON.stringify(this.taskDetailDto.unCompleteGrowersDto));
+        }
+    }
+
     getTaskDetail() {
         this.sqlite.create({
             name: 'taskDB.db',
@@ -47,6 +63,7 @@ export class TaskDetailPage implements OnInit {
                                         // this.taskDetailDto.visitTotal += r.rows.item(0).visitNum;
                                         this.taskDetailDto.growers.push(TaskGrowerDto.fromJS(r.rows.item(i)));
                                     }
+                                    this.taskDetailDto.unCompleteGrowers;
                                 }
                                 // alert(JSON.stringify(r.rows.length));
                                 // alert(JSON.stringify(this.taskDetailDto.growers));

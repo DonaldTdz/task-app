@@ -1,4 +1,5 @@
 export class TaskExamineDto {
+    id: string;
     name: string;
     desc: string;
     score: number;
@@ -51,6 +52,7 @@ export class TaskExamineDto {
     }
     init(data?: any) {
         if (data) {
+            this.id = data["id"];
             this.name = data["name"];
             this.desc = data["desc"];
             this.score = data["score"];

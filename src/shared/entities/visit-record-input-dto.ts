@@ -18,6 +18,9 @@ export class VisitRecordInputDto {
     visitName: string;
     visitDesc: string;
     taskId: string;
+    isOnline: number;
+    area: number;
+    scheduleStatus: number;
     get taskTypeName() {
         if (this.taskType === 1) {
             return '技术服务';
@@ -37,9 +40,29 @@ export class VisitRecordInputDto {
     get taskDesc() {
         return `${this.visitName}(${this.taskTypeName})，${this.visitDesc}`;
     }
-
+    get taskDescDetail() {
+        return `${this.visitName}(${this.taskTypeName}) `
+    }
     get summDesc() {
         return `${this.taskDesc}已拜访${this.growerName}`;
+    }
+    get summDescDetail() {
+        return `${this.taskDescDetail}已拜访${this.growerName}`;
+    }
+
+    get scheduleStatusName() {
+        if (this.scheduleStatus === 0) {
+            return '已逾期';
+        } else if (this.scheduleStatus === 1) {
+            return '未开始';
+        } else if (this.scheduleStatus === 2) {
+            return '进行中';
+        } else if (this.scheduleStatus === 3) {
+            return '已完成';
+        }
+        else {
+            return 'None';
+        }
     }
     constructor(data?: any) {
         if (data) {
@@ -68,6 +91,10 @@ export class VisitRecordInputDto {
             this.visitName = data["visitName"];
             this.visitDesc = data["visitDesc"];
             this.taskId = data["taskId"];
+
+            this.isOnline = data["isOnline"];
+            this.area = data["area"];
+            this.scheduleStatus = data["scheduleStatus"];
         }
     }
 

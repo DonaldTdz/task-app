@@ -1,9 +1,38 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Tab Two
+      数据同步
     </ion-title>
   </ion-toolbar>
 </ion-header>
-
-<ion-content></ion-content>
+<ion-content>
+  <ion-list lines="none" *ngIf="list.length > 0">
+    <ion-list-header>
+      <ion-label>已完成任务列表</ion-label>
+    </ion-list-header>
+    <!-- <ion-item *ngFor="let item of scheduleTaskDtoList" (click)="goDetails(item.id)">
+      <ion-avatar slot="start">
+        <img src="assets/icon/warn_y.png">
+      </ion-avatar>
+      <ion-label>
+        <h2>{{item.title}}</h2>
+        <p>截止时间：{{item.endTime| date:'yyyy-MM-dd'}} | {{item.extra}}</p>
+      </ion-label>
+      <ion-avatar style="margin-bottom:0px;" slot="end">
+        <img style="width:30px;height:30px;" src="assets/icon/extra.png">
+      </ion-avatar>
+    </ion-item> -->
+    <ion-item *ngFor="let item of list" (click)="goDetails(item.id)">
+      <ion-label>{{item.taskTitle}}
+        <p>[{{item.growerName}}]截止时间：{{item.endTime | date:'yyyy-MM-dd'}}</p>
+      </ion-label>
+      <ion-note slot="end">{{item.statusName}}</ion-note>
+    </ion-item>
+  </ion-list>
+  <div class="item ddcenter page-margin page-padding" *ngIf="list.length == 0">
+    <ion-img src="assets/icon/nodata-search.png"></ion-img>
+    <p style="color:gray; margin-top:10px;">没有已完成的任务</p>
+  </div>
+  <p>已完成{{num}}</p>
+  <ion-button (click)="upload()">上传数据</ion-button>
+</ion-content>

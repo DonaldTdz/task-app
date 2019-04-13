@@ -1,12 +1,12 @@
-export class VisitRecordDto {
-    id: string;
+export class AreaRecordInputDto {
+    scheduleDetailId: string;
     location: string;
-    signTime: Date;
-    creationTime: Date;
+    longitude: number;
+    latitude: number;
     area: number;
-    desc: string;
-    imgPath: string;
-    isOnline: number;
+    remark: string;
+    imgPaths: string;
+
     constructor(data?: any) {
         if (data) {
             for (var property in data) {
@@ -17,26 +17,25 @@ export class VisitRecordDto {
     }
     init(data?: any) {
         if (data) {
-            this.id = data["id"];
+            this.scheduleDetailId = data["scheduleDetailId"];
             this.location = data["location"];
-            this.signTime = data["signTime"];
-            this.creationTime = data["creationTime"];
             this.area = data["area"];
-            this.desc = data["desc"];
-            this.imgPath = data["imgPath"];
-            this.isOnline = data["isOnline"];
+            this.longitude = data["longitude"];
+            this.latitude = data["latitude"];
+            this.remark = data["remark"];
+            this.imgPaths = data["imgPaths"];
         }
     }
 
-    static fromJS(data: any): VisitRecordDto {
-        let result = new VisitRecordDto();
+    static fromJS(data: any): AreaRecordInputDto {
+        let result = new AreaRecordInputDto();
         result.init(data);
         return result;
     }
-    static fromJSArray(dataArray: any[]): VisitRecordDto[] {
+    static fromJSArray(dataArray: any[]): AreaRecordInputDto[] {
         let array = [];
         dataArray.forEach(result => {
-            let item = new VisitRecordDto();
+            let item = new AreaRecordInputDto();
             item.init(result);
             array.push(item);
         });

@@ -44,11 +44,11 @@ export class AppComponent {
           }).then(() => {
             db.executeSql('create table if not exists scheduleDetail(id varchar(36) PRIMARY KEY not null,taskId int not null,scheduleId varchar(36) not null,employeeId Long not null,growerId int not null,visitNum int,completeNum int,status int,scheduleTaskId varchar(36) not null,employeeName nvarchar(50),growerName nvarchar(50),creationTime DateTime);', [])
           }).then(() => {
-            db.executeSql('create table if not exists visitRecord(id varchar(36) PRIMARY KEY not null,scheduleDetailId varchar(36) not null,employeeId Long,growerId int,signTime DateTime,location nvarchar(200),longitude decimal(18,2),latitude decimal(18,2),desc nvarchar(500),imgPath nvarchar(500),creationTime DateTime);', [])
+            db.executeSql('create table if not exists visitRecord(id varchar(36) PRIMARY KEY not null,scheduleDetailId varchar(36) not null,employeeId integer,growerId int,signTime DateTime,location nvarchar(200),longitude decimal(18,2),latitude decimal(18,2),desc nvarchar(500),imgPath nvarchar(2000),creationTime DateTime,isOnline int);', [])
           }).then(() => {
             db.executeSql('create table if not exists visitExamine(id varchar(36) PRIMARY KEY not null,visitRecordId varchar(36),employeeId int,growerId int,taskExamineId int,score int,creationTime DateTime);', [])
           }).then(() => {
-            db.executeSql('create table if not exists growerAreaRecords(id varchar(36) PRIMARY KEY not null,growerId int not null,scheduleDetailId varchar(36) not null,imgPath nvarchar(500),longitude decimal(11,8),latitude decimal(11,8),location nvarchar(200),employeeName nvarchar(200),employeeId nvarchar(200),collectionTime DateTime,area decimal(18,2),remark nvarchar(200));', [])
+            db.executeSql('create table if not exists growerAreaRecords(id varchar(36) PRIMARY KEY not null,growerId int not null,scheduleDetailId varchar(36) not null,imgPath nvarchar(2000),longitude decimal(11,8),latitude decimal(11,8),location nvarchar(200),employeeName nvarchar(200),employeeId nvarchar(200),collectionTime DateTime,area decimal(18,2),remark nvarchar(200),isOnline int);', [])
           }).then(() => {
             db.executeSql('create table if not exists growerLocationLogs(id varchar(36) PRIMARY KEY not null,employeeId nvarchar(200),growerId int not null,longitude decimal(2,0),latitude decimal(2,0),creationTime DateTime);', [])
           }).then(() => {

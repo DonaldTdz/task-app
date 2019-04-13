@@ -15,3 +15,7 @@ export * from './system-data';
 export * from './visit-record-dto';
 export * from './visit-record-input-dto';
 export * from './task-examine-dto';
+export * from './area-record-input-dto';
+export * from './schedule-detail-dto';
+export * from './api-result';
+export * from './grower-dto';
