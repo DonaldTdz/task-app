@@ -14,6 +14,25 @@ export class TaskDetailDto {
     completeGrowersDto: TaskGrowerDto[] = [];
     unCompleteGrowersDto: TaskGrowerDto[] = [];
 
+    get statusImg() {
+        if (this.completeNum == this.visitTotal) {
+            return 'assets/icon/icon_status-dot-G.png';
+        }
+
+        if (this.endDay < 0) {
+            return 'assets/icon/icon_status-dot-R1.png';
+        }
+
+        if (this.endDay == 1) {
+            return 'assets/icon/icon_status-dot-R.png';
+        }
+
+        if (this.endDay < 5) {
+            return 'assets/icon/icon_status-dot-Y.png';
+        }
+        return 'assets/icon/icon_status-dot-GR.png';
+    }
+
     get taskTitle() {
         return this.taskName + "（" + this.taskTypeName + "）";
     }
@@ -33,7 +52,7 @@ export class TaskDetailDto {
     get endDay() {
         if (this.endTime) {
             const endtime = moment(this.endTime);
-            return endtime.diff(moment(), 'days');
+            return endtime.diff(moment(), 'days') + 1;
         }
     }
 

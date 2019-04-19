@@ -7,6 +7,7 @@ import { TabsPageRoutingModule } from './tabs.router.module';
 
 import { TabsPage } from './tabs.page';
 import { SQLite } from '@ionic-native/sqlite/ngx';
+import { UserInfoService } from 'src/services';
 
 @NgModule({
   imports: [
@@ -16,6 +17,6 @@ import { SQLite } from '@ionic-native/sqlite/ngx';
     TabsPageRoutingModule
   ],
   declarations: [TabsPage],
-  providers: [SQLite]
+  providers: [SQLite, UserInfoService]
 })
 export class TabsPageModule { }

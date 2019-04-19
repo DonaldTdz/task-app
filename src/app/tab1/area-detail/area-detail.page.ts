@@ -45,12 +45,12 @@ export class AreaDetailPage {
                             }
                         }
                     } else {
-                        alert('未获取到面积落实详情');
+                        this.navCtrl.pop();
                     }
                     // alert(JSON.stringify(this.areaRecordDto));
                 }).catch((e) => {
                     alert('面积落实详情异常信息' + JSON.stringify(e));
-                })
+                });
         })
     }
 

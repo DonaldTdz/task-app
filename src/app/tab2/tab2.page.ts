@@ -1,10 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, Injector } from '@angular/core';
 import { OnLineService } from 'src/services/on-line/on-line.service';
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
-import { ScheduleTaskDto, Schedule, ScheduleDetail, ScheduleTask, GrowerLocationLogs, GrowerAreaRecord, VisitExamine, VisitRecord, VisitTask, TaskExamine, ScheduleDetailDto, ApiResult, GrowerDto } from 'src/shared/entities';
+import { ScheduleDetail, GrowerLocationLogs, GrowerAreaRecord, VisitExamine, VisitRecord, VisitTask, TaskExamine, ScheduleDetailDto, ApiResult, TaskInfoDto, Employee } from 'src/shared/entities';
 import { Router } from '@angular/router';
 import { CommonHttpClient } from 'src/services/common-httpclient';
 import { ToastController } from '@ionic/angular';
+import { UserInfoService } from 'src/services';
+
+export class TaskInfo {
+  growerLocationLogList: GrowerLocationLogs[] = [];
+  growerAreaRecordList: GrowerAreaRecord[] = [];
+  visitExamineList: VisitExamine[] = [];
+  visitRecordList: VisitRecord[] = []
+  visitTaskList: VisitTask[] = [];
+  taskExamineList: TaskExamine[] = [];
+
+}
 
 @Component({
   selector: 'app-tab2',
@@ -14,32 +25,35 @@ import { ToastController } from '@ionic/angular';
 
 })
 export class Tab2Page {
-  curDate: string;
-  userId = '1926112826844702';
-  scheduleTaskDtoList: ScheduleTaskDto[] = [];
-
-  scheduleList: Schedule[] = [];
-  scheduleDetailList: ScheduleDetail[] = [];
-  scheduleTaskList: ScheduleTask[] = [];
-  growerList: GrowerDto[] = [];
-  growerLocationLogList: GrowerLocationLogs[] = [];
-  growerAreaRecordList: GrowerAreaRecord[] = [];
-  visitExamineList: VisitExamine[] = [];
-  visitRecordList: VisitRecord[] = []
-  visitTaskList: VisitTask[] = [];
-  taskExamineList: TaskExamine[] = [];
-  num: number = 0;
+  // curDate: string;
+  // userId = '1926112826844702';
+  // scheduleTaskDtoList: ScheduleTaskDto[] = [];
+  // scheduleList: Schedule[] = [];
+  // scheduleDetailList: ScheduleDetail[] = [];
+  // scheduleTaskList: ScheduleTask[] = [];
+  // growerList: GrowerDto[] = [];
+  // growerLocationLogList: GrowerLocationLogs[] = [];
+  // growerAreaRecordList: GrowerAreaRecord[] = [];
+  // visitExamineList: VisitExamine[] = [];
+  // visitRecordList: VisitRecord[] = []
+  // visitTaskList: VisitTask[] = [];
+  // taskExamineList: TaskExamine[] = [];
+  num: number = 1;
   list: ScheduleDetailDto[] = [];
   loading: boolean = false;
+  tempParams: TaskInfoDto;
+  userInfo: Employee;
   constructor(private sqlite: SQLite
     , private router: Router
     , private onLineService: OnLineService
     , private toastController: ToastController
+    , private settingsService: UserInfoService
   ) {
   }
 
-  ionViewWillEnter() {
-    // this.scheduleTaskDtoList = [];
+  async ionViewWillEnter() {
+    this.num = 1;
+    this.userInfo = await this.settingsService.getUserInfo();
     this.refreshData();
   }
 
@@ -63,7 +77,7 @@ export class Tab2Page {
       // })
       .then(async (db: SQLiteObject) => {
         await db.executeSql('select sd.Id id,s.EndTime endTime,sd.GrowerName growerName,sd.Status status,t.Name taskName,t.Type taskType from scheduleDetail sd inner join visitTasks t on sd.TaskId = t.Id inner join schedule s on sd.ScheduleId = s.Id where sd.EmployeeId = ? and (sd.Status = 3 or sd.Status =2) and s.Status =1 order by sd.Status desc'
-          , [this.userId]).then((res) => {
+          , [this.userInfo.id]).then((res) => {
             if (res.rows.length > 0) {
               for (var i = 0; i < res.rows.length; i++) {
                 this.list.push(ScheduleDetailDto.fromJS(res.rows.item(i)));
@@ -77,253 +91,316 @@ export class Tab2Page {
   }
 
   goDetails(id) {
-    // this.router.navigate(['/tabs/tab1/task-detail', id]);
     this.router.navigate(['/tabs/tab1/visit', id]);
-  }
-  initArry() {
-    this.scheduleList = [];
-    this.scheduleDetailList = [];
-    this.scheduleTaskList = [];
-    this.growerList = [];
-    this.growerLocationLogList = [];
-    this.growerAreaRecordList = [];
-    this.visitExamineList = [];
-    this.visitRecordList = []
-    this.visitTaskList = [];
-    this.taskExamineList = [];
-    // alert('init');
-  }
-  async getData() {
-    // this.initArry();
-    //  await this.scheduleTaskDtoList.forEach(v => {
-    for (var i = 0; i < this.list.length; i++) {
-      this.initArry();
-      await this.sqlite.create({
-        name: 'taskDB.db',
-        location: 'default'
-      }).then((db: SQLiteObject) => {
-        db.executeSql('select * from scheduleDetail where id =?', [this.list[i].id]).then(async (sd) => {
-          await alert('查询数据');
-          if (sd.rows.length > 0) {
-            // alert(2);
-            for (var i = 0; i < sd.rows.length; i++) {
-              this.scheduleDetailList.push(ScheduleDetail.fromJS(sd.rows.item(i)));
-              //查询面积落实
-              await db.executeSql('select * from growerAreaRecords where scheduleDetailId =? and isOnline = 0'
-                , [sd.rows.item(i).id]).then(async (gar) => {
-                  if (gar.rows.length > 0) {
-                    for (var i = 0; i < gar.rows.length; i++) {
-                      this.growerAreaRecordList.push(GrowerAreaRecord.fromJS(gar.rows.item(i)));
-                      await db.executeSql('select * from grower where id =?', [gar.rows.item(i).growerId]).then((g) => {
-                        if (gar.rows.length > 0) {
-                          for (var i = 0; i < g.rows.length; i++) {
-                            this.growerList.push(GrowerDto.fromJS(g.rows.item(i)));
-                          }
-                        }
-                      }).catch((e) => {
-                        alert('烟农信息上传失败' + JSON.stringify(e));
-                      })
-                    }
-                  }
-                  // alert(JSON.stringify('面积落实记录' + this.growerAreaRecordList));
-                }).catch((e) => {
-                  alert('面积落实记录上传失败' + JSON.stringify(e));
-                });
-              //查询拜访任务
-              await db.executeSql('select * from visitRecord where scheduleDetailId =? and isOnline = 0', [sd.rows.item(i).id]).then(async (re) => {
-                // alert(4);
-                if (re.rows.length > 0) {
-                  for (var i = 0; i < re.rows.length; i++) {
-                    this.visitRecordList.push(VisitRecord.fromJS(re.rows.item(i)));
-                    await db.executeSql('select * from visitExamine where visitRecordId =?', [re.rows.item(i).id]).then((ve) => {
-                      // alert(5);
-                      if (ve.rows.length > 0) {
-                        for (var i = 0; i < ve.rows.length; i++) {
-                          this.visitExamineList.push(VisitExamine.fromJS(ve.rows.item(i)));
-                        }
-                      }
-                    }).catch((e) => {
-                      alert('拜访考核项上传失败' + JSON.stringify(e));
-                    });
-                  }
-                }
-                // alert(JSON.stringify(this.visitRecordList));
-              }).catch((e) => {
-                alert('拜访记录上传失败' + JSON.stringify(e));
-              });
-            }
-            // alert(JSON.stringify(this.scheduleDetailList));
-            await db.executeSql('select * from growerLocationLogs where isOnline = 0', []).then((gll) => {
-              if (gll.rows.length > 0) {
-                for (var i = 0; i < gll.rows.length; i++) {
-                  this.growerLocationLogList.push(GrowerLocationLogs.fromJS(gll.rows.item(i)));
-                }
-              }
-            }).catch((e) => {
-              alert('采集位置查询失败' + JSON.stringify(e));
-            })
-          }
-          // alert(JSON.stringify('计划明细' + this.scheduleDetailList));
-        }).catch((e) => {
-          alert('计划详情查询失败' + JSON.stringify(e));
-        })
-      });
-      await alert(i);
-      this.returnServer().then(() => {
-        if (this.list.length - 1 == i) {
-          // this.refreshData();
-        }
-      });
-      // .then(async v => {
-      //   // alert('all');
-      //   await alert(i);
-      //   await this.returnServer().then(() => {
-      //     if (this.list.length - 1 == i) {
-      //       this.refreshData();
-      //     }
-      //   });
-      // })
-    }
-    // await this.refreshData();
-    // alert('finally');
   }
 
   async upload() {
-    this.loading = true;
-    await this.getData()
-    // .then(() => {
-    //   alert('最后一次');
-    // });
-    // await this.refreshData();
+    this.num = 1;
+    await this.getUploadData();
+    setTimeout(() => {
+      this.refreshData();
+    }, 1000);
   }
 
-  async returnServer() {
-    alert('进来删除几次');
-    //执行完毕数据回传
-    let params: any = {};
-    params.VisitExamineList = this.visitExamineList;
-    params.ScheduleDetailList = this.scheduleDetailList;
-    params.GrowerAreaRecordList = this.growerAreaRecordList;
-    params.VisitRecordList = this.visitRecordList;
-    params.GrowerList = this.growerList;
-    params.GrowerLocationLogList = this.growerLocationLogList;
-    params.EmployeeId = this.userId;
-    // alert(JSON.stringify(this.scheduleDetailList));
-    // alert(JSON.stringify(this.growerList));
-    // alert(JSON.stringify(this.growerAreaRecordList));
-    // alert(JSON.stringify(this.growerLocationLogList));
-    // alert(JSON.stringify(this.visitRecordList));
-    // alert(JSON.stringify(params));
-    this.onLineService.uploadData(params).subscribe((result: ApiResult) => {
-      if (result.code === 901) {
-        //delete 删拜访考核项-拜访记录and面积落实记录-计划详情
+  async getUploadData() {
+    this.num = 1;
+    this.loading = true;
+    for (const item of this.list) {
+      const sd = await this.getTaskInfo(item.id).catch(() => { this.loading = false; this.errorMsg() });
+      // alert('sd' + JSON.stringify(sd));
+      const gll = await this.getGLL(sd, this.num, this.list.length).catch(() => { this.loading = false; this.errorMsg() });
+      // alert('gll' + JSON.stringify(gll));
+      const td = await this.getTaskDetail(gll).catch(() => { this.loading = false; this.errorMsg() });
+      // alert('td' + JSON.stringify(td));
+      const te = await this.getTaskExamine(td).catch(() => { this.loading = false; this.errorMsg() });
+      // alert('te' + JSON.stringify(te));
+      await this.goServer(te).catch(() => { this.loading = false; this.errorMsg() });
+      // alert('将要删除的内容3' + JSON.stringify(te));
+      await this.delete(this.tempParams).catch(() => { this.loading = false; this.errorMsg() });
+      // alert(4);
+      const toast = await this.toastController.create({
+        color: 'dark',
+        duration: 3000,
+        message: '数据上传成功',
+        showCloseButton: false,
+        position: 'middle'
+      });
+      await toast.present();
+      await this.num++;
+    }
+    this.loading = false;
+  }
+
+  /**
+   * 错误提示框
+   */
+  async errorMsg() {
+    const toast = await this.toastController.create({
+      color: 'dark',
+      duration: 3000,
+      message: '数据上传失败，请重试',
+      showCloseButton: false,
+      position: 'middle'
+    });
+    await toast.present();
+  }
+  /**
+   * 查询计划任务
+   * @param id sdId
+   */
+  getTaskInfo(id): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.sqlite.create({
+        name: 'taskDB.db',
+        location: 'default'
+      }).then((db: SQLiteObject) => {
+        var taskInfoDto = new TaskInfoDto();
+        db.executeSql('select * from scheduleDetail where id =?', [id]).then((sd) => {
+          if (sd.rows.length > 0) {
+            taskInfoDto.scheduleDetail = ScheduleDetail.fromJS(sd.rows.item(0));
+            this.tempParams = taskInfoDto;
+            resolve(taskInfoDto);
+          }
+        }).catch((e) => {
+          alert('计划详情上传失败' + JSON.stringify(e));
+          reject('计划详情上传失败');
+        });
+      }).catch((e) => {
+        alert('打开数据库失败' + JSON.stringify(e));
+        reject('打开数据库失败');
+      });
+    })
+  }
+
+  /**
+   * 查询考核项
+   * @param taskInfoDto 
+   */
+  getTaskExamine(taskInfoDto: TaskInfoDto): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.sqlite.create({
+        name: 'taskDB.db',
+        location: 'default'
+      }).then((db: SQLiteObject) => {
+        const promises = taskInfoDto.visitRecordList.map(function (vr) {
+          return db.executeSql('select * from visitExamine where visitRecordId =?', [vr.id]).then((ve) => {
+            if (ve.rows.length > 0) {
+              taskInfoDto.visitExamineList.push(...VisitExamine.fromJSArraySQL(ve));
+            }
+          }).catch((e) => {
+            alert('拜访考核项上传失败' + JSON.stringify(e));
+            reject('拜访考核项上传失败');
+          });
+        });
+        Promise.all(promises).then((pro) => {
+          this.tempParams = taskInfoDto;
+          resolve(taskInfoDto);
+        }).catch((cat) => {
+
+        });
+      }).catch((e) => {
+        alert('打开数据库失败' + JSON.stringify(e));
+        reject('打开数据库失败');
+      });
+    })
+  }
+
+  /**
+   * 采集位置上传
+   * @param taskInfoDto 
+   */
+  getGLL(taskInfoDto: TaskInfoDto, curNum: number, allNum: number): Promise<any> {
+
+    return new Promise<any>((resolve, reject) => {
+      if (curNum == allNum) {
+        // alert('in' + curNum);
         this.sqlite.create({
           name: 'taskDB.db',
           location: 'default'
-        }).then(async (db: SQLiteObject) => {
-          await alert('进入删除状态');
-          for (var i = 0; i < this.visitExamineList.length; i++) {
-            await db.executeSql('delete from visitExamine where id =?', [this.visitExamineList[i].id]).then((ve) => {
-              // alert(JSON.stringify(ve));
-            }).catch(e => {
-              alert('考核项删除异常' + JSON.stringify(e));
-            })
-            // alert(1);
-          }
-          for (var i = 0; i < this.visitRecordList.length; i++) {
-            await db.executeSql('delete from visitRecord where id =?', [this.visitRecordList[i].id]).then((vr) => {
-              // alert(JSON.stringify(vr));
-            }).catch(e => {
-              alert('拜访记录删除异常' + JSON.stringify(e));
-            })
-            // alert(2);
-          }
-          for (var i = 0; i < this.growerAreaRecordList.length; i++) {
-            await db.executeSql('delete from growerAreaRecords where id =?', [this.growerAreaRecordList[i].id]).then((gar) => {
-              // alert(JSON.stringify(gar));
-            }).catch(e => {
-              alert('面积落实记录删除异常' + JSON.stringify(e));
-            })
-            // alert(3);
-          }
-          for (var i = 0; i < this.scheduleDetailList.length; i++) {
-            await db.executeSql('delete from scheduleDetail where id =?', [this.scheduleDetailList[i].id]).then(async (sd) => {
-              await alert('删除数据' + JSON.stringify(sd));
-            }).catch(e => {
-              alert('计划详情记录删除异常' + JSON.stringify(e));
-            })
-            // alert(4);
-          }
-          // alert('进入删除状态');
-          // for (var i = 0; i < this.visitExamineList.length; i++) {
-          //   db.executeSql('delete from visitExamine where id =?', [this.visitExamineList[i].id]).then((ve) => {
-          //     // alert(JSON.stringify(ve));
-          //   }).catch(e => {
-          //     alert('考核项删除异常' + JSON.stringify(e));
-          //   })
-          //   // alert(1);
-          // }
-          // for (var i = 0; i < this.visitRecordList.length; i++) {
-          //   db.executeSql('delete from visitRecord where id =?', [this.visitRecordList[i].id]).then((vr) => {
-          //     // alert(JSON.stringify(vr));
-          //   }).catch(e => {
-          //     alert('拜访记录删除异常' + JSON.stringify(e));
-          //   })
-          //   // alert(2);
-          // }
-          // for (var i = 0; i < this.growerAreaRecordList.length; i++) {
-          //   db.executeSql('delete from growerAreaRecords where id =?', [this.growerAreaRecordList[i].id]).then((gar) => {
-          //     // alert(JSON.stringify(gar));
-          //   }).catch(e => {
-          //     alert('面积落实记录删除异常' + JSON.stringify(e));
-          //   })
-          //   // alert(3);
-          // }
-          // for (var i = 0; i < this.scheduleDetailList.length; i++) {
-          //   db.executeSql('delete from scheduleDetail where id =?', [this.scheduleDetailList[i].id]).then((sd) => {
-          //     alert('删除数据' + JSON.stringify(sd));
-          //   }).catch(e => {
-          //     alert('计划详情记录删除异常' + JSON.stringify(e));
-          //   })
-          // alert(4);
-          // }
-        }).then(() => {
-          this.loading = false;
-          this.toastController.create({
-            color: 'dark',
-            duration: 3000,
-            message: '数据上传成功',
-            showCloseButton: false,
-            position: 'middle'
-          }).then(toast => {
-            toast.present();
-          }).then(() => {
-            this.num++;
-          })
-        }).catch(() => {
-          this.loading = false;
-          this.toastController.create({
-            color: 'dark',
-            duration: 5000,
-            message: '数据上传失败',
-            showCloseButton: false,
-            position: 'middle'
-          }).then(toast => {
-            toast.present();
-          })
+        }).then((db: SQLiteObject) => {
+          db.executeSql('select * from growerLocationLogs where isOnline = 0', []).then((gll) => {
+            if (gll.rows.length > 0) {
+              taskInfoDto.growerLocationLogList = GrowerLocationLogs.fromJSArraySQL(gll);
+              this.tempParams.growerLocationLogList = taskInfoDto.growerLocationLogList;
+            }
+            resolve(taskInfoDto);
+          }).catch((e) => {
+            alert('采集位置上传失败' + JSON.stringify(e));
+            reject('采集位置上传失败');
+          });
         });
       } else {
-        this.loading = false;
-        this.toastController.create({
-          color: 'dark',
-          duration: 5000,
-          message: '数据上传失败',
-          showCloseButton: false,
-          position: 'middle'
-        }).then(toast => {
-          toast.present();
-        })
+        resolve(taskInfoDto);
       }
+    });
+  }
+  /**
+   * 查询拜访详情
+   * @param id sdId
+   * @param type sdType
+   */
+  getTaskDetail(taskInfo: TaskInfoDto): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.sqlite.create({
+        name: 'taskDB.db',
+        location: 'default'
+      }).then((db: SQLiteObject) => {
+        const promises = [];
+        //查询面积落实
+        promises.push(db.executeSql('select * from growerAreaRecords where scheduleDetailId =?and isOnline = 0'
+          , [taskInfo.scheduleDetail.id]).then((gar) => {
+            if (gar.rows.length > 0) {
+              taskInfo.growerAreaRecordList = GrowerAreaRecord.fromJSArraySQL(gar);
+            }
+            return true;
+          }).catch((e) => {
+            alert('面积落实记录上传失败' + JSON.stringify(e));
+            reject('面积落实记录上传失败');
+          }));
+        //查询拜访任务
+        promises.push(db.executeSql('select * from visitRecord where scheduleDetailId =? and isOnline = 0', [taskInfo.scheduleDetail.id]).then((vr) => {
+          if (vr.rows.length > 0) {
+            taskInfo.visitRecordList = VisitRecord.fromJSArraySQL(vr);
+            // taskInfo.visitRecordList.map(function (vr) {
+            //    promises.push(db.executeSql('select * from visitExamine where visitRecordId =?', [vr.id]).then((ve) => {
+            //     if (ve.rows.length > 0) {
+            //       taskInfo.visitExamineList.push(...VisitExamine.fromJSArraySQL(ve));
+            //     }
+            //     alert(JSON.stringify(taskInfo.visitExamineList));
+            //     return true;
+            //   }).catch((e) => {
+            //     alert('拜访考核项上传失败' + JSON.stringify(e));
+            //     reject('拜访考核项上传失败');
+            //   }));
+            // })
+          }
+          return true;
+        })
+
+          .catch((e) => {
+            alert('拜访任务上传失败' + JSON.stringify(e));
+            reject('拜访任务上传失败');
+          }));
+
+        Promise.all(promises).then((pro) => {
+          this.tempParams = taskInfo;
+          // return taskInfo;
+          resolve(taskInfo);
+        })
+          // .then((taskInfo) => {
+          //   taskInfo.visitRecordList.map(function (vr) {
+          //     db.executeSql('select * from visitExamine where visitRecordId =?', [vr.id]).then((ve) => {
+          //       if (ve.rows.length > 0) {
+          //         taskInfo.visitExamineList.push(...VisitExamine.fromJSArraySQL(ve));
+          //       }
+          //       // alert(JSON.stringify(taskInfo.visitExamineList));
+          //       this.tempParams = taskInfo;
+          //       alert(2);
+          //       resolve(taskInfo.visitExamineList);
+          //     }).catch((e) => {
+          //       alert('拜访考核项上传失败' + JSON.stringify(e));
+          //       reject('拜访考核项上传失败');
+          //     });
+          //   })
+          // })
+
+
+          // .then((ti) => {
+          //   ti.visitRecordList.map(function (vr) {
+          //     promises.push(db.executeSql('select * from visitExamine where visitRecordId =?', [vr.id]).then((ve) => {
+          //       // alert(JSON.stringify(ve));
+          //       if (ve.rows.length > 0) {
+          //         // taskInfo.visitExamineList.push(...VisitExamine.fromJSArraySQL(ve));
+          //         // alert(JSON.stringify(VisitExamine.fromJSArraySQL(ve)));
+          //         for (var i = 0; i < ve.rows.length; i++) {
+          //           alert('循环' + i);
+          //           alert(JSON.stringify(VisitExamine.fromJS(ve.rows.item(i))));
+          //           taskInfo.visitExamineList.push(VisitExamine.fromJS(ve.rows.item(i)));
+          //           // taskInfo.visitExamineList.push(...VisitExamine.fromJSArraySQL(ve));
+          //         }
+          //       }
+          //       // alert(JSON.stringify(taskInfo));
+          //       this.tempParams = taskInfo;
+          //       return true;
+          //       // alert(JSON.stringify(this.tempParams));
+          //     }).catch((e) => {
+          //       alert('拜访考核项上传失败' + JSON.stringify(e));
+          //       reject('拜访考核项上传失败');
+          //     }));
+          //   });
+          //   this.tempParams = taskInfo;
+          //   resolve(taskInfo);
+          // })
+          .catch((pro) => {
+            alert('数据上传失败' + JSON.stringify(pro));
+          });
+      }).catch((e) => {
+        alert('打开数据库失败' + JSON.stringify(e));
+        reject('打开数据库失败');
+      });
     })
+  }
+
+  /**
+   * 删除任务
+   * @param taskInfo 
+   */
+  delete(taskInfo: TaskInfoDto): Promise<boolean> {
+    return new Promise<any>((resolve, reject) => {
+      this.sqlite.create({
+        name: 'taskDB.db',
+        location: 'default'
+      }).then((db: SQLiteObject) => {
+        const promises = [];
+        taskInfo.growerAreaRecordList.forEach(function (gar) {
+          promises.push(db.executeSql('delete from growerAreaRecords where id =?', [gar.id]));
+        });
+        taskInfo.visitExamineList.forEach(function (ve) {
+          promises.push(db.executeSql('delete from visitExamine where id =?', [ve.id]));
+        });
+        taskInfo.visitRecordList.forEach(function (vr) {
+          promises.push(db.executeSql('delete from visitRecord where id =?', [vr.id]));
+        });
+        promises.push(db.executeSql('delete from scheduleDetail where id =?', [taskInfo.scheduleDetail.id]));
+        Promise.all(promises).then((pro) => {
+          // alert('删除完成' + JSON.stringify(pro));
+          resolve(true);
+        }).catch((pro) => {
+          reject(false);
+          alert('删除失败' + JSON.stringify(pro));
+        });
+      }).catch((e) => {
+        reject(false);
+        alert('打开数据库失败' + JSON.stringify(e));
+        reject('打开数据库失败');
+      });
+    });
+  }
+
+  /**
+   * 回传数据
+   * @param taskInfo 
+   */
+  goServer(taskInfo: TaskInfoDto): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      // alert(1);
+      //执行完毕数据回传
+      let params: any = {};
+      params.VisitExamineList = taskInfo.visitExamineList;
+      params.ScheduleDetail = taskInfo.scheduleDetail;
+      params.GrowerAreaRecordList = taskInfo.growerAreaRecordList;
+      params.VisitRecordList = taskInfo.visitRecordList;
+      params.GrowerLocationLogList = taskInfo.growerLocationLogList;
+      params.EmployeeId = this.userInfo.id;
+      // alert(JSON.stringify(params));
+      this.onLineService.uploadData(params).subscribe((result: ApiResult) => {
+        // alert(JSON.stringify(params));
+        if (result.code === 901) {
+          resolve(taskInfo);
+        } else {
+          reject(null);
+        }
+      });
+    }).catch(() => { alert('与服务器失去连接，请重试') });
   }
 }

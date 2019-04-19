@@ -47,10 +47,14 @@ export class GrowerLocationLogs {
         });
         return array;
     }
-    clone() {
-        const json = this.toJSON();
-        let result = new GrowerLocationLogs();
-        result.init(json);
-        return result;
+
+    static fromJSArraySQL(dataArray: any): GrowerLocationLogs[] {
+        let array = [];
+        for (var i = 0; i < dataArray.rows.length; i++) {
+            let item = new GrowerLocationLogs();
+            item.init(dataArray.rows.item(i));
+            array.push(item);
+        }
+        return array;
     }
 }

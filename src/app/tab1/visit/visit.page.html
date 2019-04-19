@@ -1,5 +1,9 @@
 <ion-header>
     <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button>
+            </ion-back-button>
+        </ion-buttons>
         <ion-title>
             烟农详情
         </ion-title>
@@ -109,7 +113,7 @@
                 (click)="subArea()">提交落实面积
             </ion-button>
         </div>
-        <ion-button *ngIf="showPosition" (click)="location()" color="light" expand="block">
+        <ion-button *ngIf="showPosition && lastNum>0" (click)="location()" color="light" expand="block">
             采集烟农位置{{lastNum==0?'':'(剩余'+lastNum+'次)'}}
         </ion-button>
     </div>

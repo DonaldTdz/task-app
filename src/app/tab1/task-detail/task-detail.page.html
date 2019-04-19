@@ -1,5 +1,9 @@
 <ion-header>
     <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button>
+            </ion-back-button>
+        </ion-buttons>
         <ion-title>
             任务详情
         </ion-title>
@@ -19,7 +23,13 @@
     </ion-list>
     <ion-list lines="none" style="padding-bottom:0px; padding-top: 0px;">
         <ion-item style="padding-left: 32px;padding-right: 32px;">
-            <ion-icon slot="start" name="logo-ionic"></ion-icon>
+            <!-- <ion-icon slot="start" name="logo-ionic"></ion-icon> -->
+            <!-- <ion-thumbnail slot="start">
+                <ion-img style="width:40px;height:40px;" src="{{taskDetailDto.statusImg}}"></ion-img>
+            </ion-thumbnail> -->
+            <ion-avatar style="width:30px;height:30px;" slot="start">
+                <img src="{{taskDetailDto.statusImg}}">
+            </ion-avatar>
             <ion-label style="font-size: 14px;color: gray;">{{taskDetailDto.statusDesc}}（{{taskDetailDto.extra}}）
             </ion-label>
         </ion-item>

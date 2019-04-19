@@ -19,8 +19,19 @@ export class ScheduleTaskDto {
     get endDay() {
         if (this.endTime) {
             const endtime = moment(this.endTime);
-            return endtime.diff(moment(), 'days');
+            return endtime.diff(moment(), 'days') + 1;
         }
+    }
+
+    get thumb() {
+        if (this.endDay <= 1) {
+            return "assets/icon/warn.png";
+        }
+
+        if (this.endDay < 5) {
+            return "assets/icon/warn_y.png";
+        }
+        return "assets/icon/icon-tasknor.png";
     }
 
     get extra() {

@@ -22,7 +22,8 @@ export class AppComponent {
     this.platform.ready().then(() => {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
-    }).then(() => this.initDB());
+    })
+      .then(() => this.initDB());
   }
 
   //初始化数据库
@@ -42,7 +43,7 @@ export class AppComponent {
           }).then(() => {
             db.executeSql('create table if not exists scheduleTask(id varchar(36) PRIMARY KEY not null,taskId int not null,scheduleId varchar(36) not null,visitNum int,taskName nvarchar(200),creationTime DateTime);', [])
           }).then(() => {
-            db.executeSql('create table if not exists scheduleDetail(id varchar(36) PRIMARY KEY not null,taskId int not null,scheduleId varchar(36) not null,employeeId Long not null,growerId int not null,visitNum int,completeNum int,status int,scheduleTaskId varchar(36) not null,employeeName nvarchar(50),growerName nvarchar(50),creationTime DateTime);', [])
+            db.executeSql('create table if not exists scheduleDetail(id varchar(36) PRIMARY KEY not null,taskId int not null,scheduleId varchar(36) not null,employeeId Long not null,growerId int not null,visitNum int,completeNum int,status int,scheduleTaskId varchar(36) not null,employeeName nvarchar(50),growerName nvarchar(50),creationTime DateTime,areaTime DateTime);', [])
           }).then(() => {
             db.executeSql('create table if not exists visitRecord(id varchar(36) PRIMARY KEY not null,scheduleDetailId varchar(36) not null,employeeId integer,growerId int,signTime DateTime,location nvarchar(200),longitude decimal(18,2),latitude decimal(18,2),desc nvarchar(500),imgPath nvarchar(2000),creationTime DateTime,isOnline int);', [])
           }).then(() => {
@@ -53,6 +54,8 @@ export class AppComponent {
             db.executeSql('create table if not exists growerLocationLogs(id varchar(36) PRIMARY KEY not null,employeeId nvarchar(200),growerId int not null,longitude decimal(2,0),latitude decimal(2,0),creationTime DateTime,isOnline int);', [])
           }).then(() => {
             db.executeSql('CREATE TABLE IF NOT EXISTS systemData (id VARCHAR ( 36 ) PRIMARY KEY NOT NULL,modelId INT,type INT NOT NULL,code nvarchar ( 50 ) NOT NULL,DESC nvarchar ( 500 ),remark nvarchar ( 500 ),seq INT,creationTime DateTime );', [])
+          }).then(() => {
+            db.executeSql('CREATE TABLE IF NOT EXISTS employee (id VARCHAR ( 50 ) PRIMARY KEY NOT NULL,name VARCHAR ( 50 ),department VARCHAR (300),position VARCHAR ( 100 ),areaCode int,area VARCHAR ( 50 ));', [])
           })
       });
     }

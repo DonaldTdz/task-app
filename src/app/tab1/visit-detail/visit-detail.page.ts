@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
 import { VisitRecordInputDto, TaskExamineDto } from 'src/shared/entities';
+import { NavController } from '@ionic/angular';
 
 @Component({
     selector: 'visit-detail',
@@ -15,6 +16,7 @@ export class VisitDetailpage {
 
     constructor(private actRouter: ActivatedRoute
         , private sqlite: SQLite
+        , public navCtrl: NavController
     ) {
         this.id = this.actRouter.snapshot.params['id'];
     }
@@ -39,7 +41,7 @@ export class VisitDetailpage {
                             this.photos.push(this.visitRecordInputDto.imgPath);
                         }
                     } else {
-                        alert('未获取到拜访详情');
+                        this.navCtrl.pop();
                     }
                     // alert(JSON.stringify(this.visitRecordInputDto));
                 }).catch((e) => {

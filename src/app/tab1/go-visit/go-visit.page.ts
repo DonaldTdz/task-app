@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, Injector } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
-import { VisitRecordInputDto, TaskExamineDto, ScheduleDetail } from 'src/shared/entities';
+import { VisitRecordInputDto, TaskExamineDto, ScheduleDetail, Employee } from 'src/shared/entities';
 import { AlertController, ToastController, NavController } from '@ionic/angular';
 const uuidv1 = require('uuid/v1');
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 import { GaoDeLocation, PositionOptions } from '@ionic-native/gao-de-location/ngx';
+import { UserInfoService } from 'src/services';
 
 @Component({
     selector: 'go-visit',
@@ -16,14 +17,14 @@ import { GaoDeLocation, PositionOptions } from '@ionic-native/gao-de-location/ng
 export class GoVisitPage {
     id: string;
     score: any = 5;
-    userId = '1926112826844702';
+    // userId = '1926112826844702';
     currComletetNum: number = 0;
     currStatus: number = 2;
     scheduleDetail: ScheduleDetail = new ScheduleDetail();
     visitRecordInputDto: VisitRecordInputDto = new VisitRecordInputDto();
     photos = [];
     showMessage = '正在获取,请耐心等待...';
-
+    userInfo: Employee;
     constructor(private actRouter: ActivatedRoute
         , private sqlite: SQLite
         , public alertController: AlertController
@@ -31,17 +32,19 @@ export class GoVisitPage {
         , public navCtrl: NavController
         , private camera: Camera
         , private gaoDeLocation: GaoDeLocation
+        , private settingsService: UserInfoService
     ) {
         this.id = this.actRouter.snapshot.params['id'];
     }
 
-    ngOnInit(): void {
+    async ngOnInit(): Promise<void> {
+        this.userInfo = await this.settingsService.getUserInfo();
         this.getInitInfo();
         this.location();
     }
 
     location() {
-        this.showMessage = '正在获取,请耐心等待...';
+        this.showMessage = '正在获取位置信息,请勿重复点击...';
         this.gaoDeLocation.getCurrentPosition()
             .then(async (res: PositionOptions) => {
                 if (res.status == '定位失败') {
@@ -174,7 +177,9 @@ export class GoVisitPage {
             name: 'taskDB.db',
             location: 'default'
         }).then((db: SQLiteObject) => {
-            const currentTime = new Date().toISOString();
+            // const currentTime = new Date().toISOString();
+            var date = new Date();
+            const currentTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
             const vrId = uuidv1();
             // alert(this.visitRecordInputDto.imgPath);
             db.executeSql('INSERT INTO visitRecord(id,scheduleDetailId,employeeId,growerId,signTime,location,longitude,latitude,desc,imgPath,creationTime,isOnline) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
@@ -183,7 +188,9 @@ export class GoVisitPage {
                     this.visitRecordInputDto.examines.forEach(v => {
                         // alert('INSERT');
                         const veId = uuidv1();
-                        const creationTime = new Date().toISOString();
+                        // const creationTime = new Date().toISOString();
+                        var date = new Date();
+                        const creationTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
                         // alert(creationTime);
                         db.executeSql('INSERT INTO visitExamine(id,visitRecordId,employeeId,growerId,taskExamineId,score,creationTime) VALUES(?,?,?,?,?,?,?)'
                             , [veId, vrId, this.visitRecordInputDto.employeeId, this.visitRecordInputDto.growerId, v.id, v.score, creationTime])

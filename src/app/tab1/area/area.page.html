@@ -1,5 +1,9 @@
 <ion-header>
     <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button>
+            </ion-back-button>
+        </ion-buttons>
         <ion-title>
             面积落实
         </ion-title>
@@ -45,7 +49,7 @@
             <ion-label>
                 <h2>面积（亩）</h2>
             </ion-label>
-            <ion-input type="number" [(ngModel)]="areaRecordInput.area" placeholder="输入落实面积">
+            <ion-input type="number" inputmode="numeric" [(ngModel)]="areaRecordInput.area" placeholder="输入落实面积">
             </ion-input>
         </ion-item>
         <ion-item>

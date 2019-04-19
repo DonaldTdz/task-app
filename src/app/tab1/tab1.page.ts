@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
 import { OnLineService } from 'src/services/on-line/on-line.service';
-import { Schedule, ScheduleDetail, ScheduleTask, VisitRecord, VisitTask, TaskExamine, Grower, GrowerAreaRecord, GrowerLocationLogs, VisitExamine, ScheduleTaskDto, SystemData } from 'src/shared/entities';
+import { Schedule, ScheduleDetail, ScheduleTask, VisitRecord, VisitTask, TaskExamine, Grower, GrowerAreaRecord, GrowerLocationLogs, VisitExamine, ScheduleTaskDto, SystemData, Employee } from 'src/shared/entities';
 import { CommonHttpClient } from 'src/services/common-httpclient';
 import { ToastController, AlertController } from '@ionic/angular';
+import { UserInfoService } from 'src/services';
+import { reject } from 'q';
 
 @Component({
   selector: 'app-tab1',
@@ -26,28 +28,23 @@ export class Tab1Page {
   taskExamineList: TaskExamine[] = [];
   scheduleTaskDtoList: ScheduleTaskDto[] = [];
   systemDataList: SystemData[] = [];
-  userId = '1926112826844702';
+  // userId = '1926112826844702';
   curDate: string;
 
+  userInfo: Employee;
   loading: boolean = false;
   constructor(private router: Router
     , private sqlite: SQLite
     , private onLineService: OnLineService
     , private toastController: ToastController
     , public alertController: AlertController
+    , private settingsService: UserInfoService
   ) {
   }
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
+    this.userInfo = await this.settingsService.getUserInfo();
     this.refreshData();
   }
-  // location() {
-  //   this.gaoDeLocation.getCurrentPosition()
-  //     .then((res: PositionOptions) => {
-  //       alert(JSON.stringify(res));
-  //     }).catch((error) => {
-  //       alert(JSON.stringify(error));
-  //     });
-  // }
 
   refreshData() {
     this.scheduleTaskDtoList = [];
@@ -57,8 +54,8 @@ export class Tab1Page {
       location: 'default'
     }).then(async (db: SQLiteObject) => {
       await db.executeSql('SELECT tt.id id,tt.Name taskName,tt.Type taskType, tt.NumTotal numTotal,tt.CompleteNum completeNum,ss.EndTime endTime from schedule ss inner join (SELECT st.Id,st.ScheduleId,t.Name,t.Type,SUM(sd.VisitNum) NumTotal,SUM(sd.CompleteNum) CompleteNum from scheduleTask st inner join scheduleDetail sd on st.Id = sd.ScheduleTaskId inner join visitTasks t on st.TaskId = t.Id inner join schedule s on st.ScheduleId = s.Id where sd.EmployeeId = ? and (sd.Status = 1 or sd.Status = 2) and s.Status = 1 and s.EndTime >= ? group by st.Id,st.ScheduleId,t.Name,t.Type) tt on ss.Id = tt.ScheduleId order by ss.EndTime'
-        , [this.userId, this.curDate]).then((res) => {
-          // alert(JSON.stringify(res.rows));
+        , [this.userInfo.id, this.curDate]).then((res) => {
+          // alert(JSON.stringify(res));
           // alert(JSON.stringify(res.rows.item(0)));
           if (res.rows.length > 0) {
             for (var i = 0; i < res.rows.length; i++) {
@@ -70,6 +67,31 @@ export class Tab1Page {
           alert('异常信息' + JSON.stringify(e));
         });
     })
+  }
+
+  newrefreshData(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.scheduleTaskDtoList = [];
+      this.getDate();
+      this.sqlite.create({
+        name: 'taskDB.db',
+        location: 'default'
+      }).then((db: SQLiteObject) => {
+        db.executeSql('SELECT tt.id id,tt.Name taskName,tt.Type taskType, tt.NumTotal numTotal,tt.CompleteNum completeNum,ss.EndTime endTime from schedule ss inner join (SELECT st.Id,st.ScheduleId,t.Name,t.Type,SUM(sd.VisitNum) NumTotal,SUM(sd.CompleteNum) CompleteNum from scheduleTask st inner join scheduleDetail sd on st.Id = sd.ScheduleTaskId inner join visitTasks t on st.TaskId = t.Id inner join schedule s on st.ScheduleId = s.Id where sd.EmployeeId = ? and (sd.Status = 1 or sd.Status = 2) and s.Status = 1 and s.EndTime >= ? group by st.Id,st.ScheduleId,t.Name,t.Type) tt on ss.Id = tt.ScheduleId order by ss.EndTime'
+          , [this.userInfo.id, this.curDate]).then((res) => {
+            if (res.rows.length > 0) {
+              for (var i = 0; i < res.rows.length; i++) {
+                this.scheduleTaskDtoList.push(ScheduleTaskDto.fromJS(res.rows.item(i)));
+              }
+            }
+            resolve(true);
+          }).catch(e => {
+            alert('异常信息' + JSON.stringify(e));
+            reject('刷新异常');
+            return;
+          });
+      });
+    });
   }
 
   getDate() {
@@ -85,6 +107,187 @@ export class Tab1Page {
 
   goDetails(id) {
     this.router.navigate(['/tabs/tab1/task-detail', id]);
+  }
+  newInsert(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.sqlite.create({
+        name: 'taskDB.db',
+        location: 'default'
+      }).then((db: SQLiteObject) => {
+        const promises = [];
+        this.scheduleList.forEach(function (v) {
+          alert(JSON.stringify(v));
+          promises.push(db.executeSql('select 1 from schedule where id =?', [v.id]).then((s) => {
+            // if (s.rows.length > 0) {
+            //   db.executeSql('update schedule set desc=?,type=?,beginTime=?,endTime=?,status=?,publishTime=?,creationTime=?,name=? where id=?'
+            //     , [v.desc, v.type, v.beginTime, v.endTime, v.status, v.publishTime, v.creationTime, v.name, v.id]).catch(e => {
+            //       alert('schedule更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO schedule(id,desc,type,beginTime,endTime,status,publishTime,creationTime,name) VALUES(?,?,?,?,?,?,?,?,?)'
+            //     , [v.id, v.desc, v.type, v.beginTime, v.endTime, v.status, v.publishTime, v.creationTime, v.name]).catch(e => {
+            //       alert('schedule插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }).catch((e) => { alert('schedule' + JSON.stringify(e)); }));
+        });
+        this.scheduleTaskList.forEach(function (v) {
+          promises.push(db.executeSql('select 1 from scheduleTask where id =?', [v.id]).then((st) => {
+            // if (st.rows.length > 0) {
+            //   db.executeSql('update scheduleTask set taskId=?,scheduleId=?,visitNum=?,taskName=?,creationTime=? where id =?'
+            //     , [v.taskId, v.scheduleId, v.visitNum, v.taskName, v.creationTime, v.id]).catch(e => {
+            //       alert('scheduleTask更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO scheduleTask(id,taskId,scheduleId,visitNum,taskName,creationTime) VALUES(?,?,?,?,?,?)'
+            //     , [v.id, v.taskId, v.scheduleId, v.visitNum, v.taskName, v.creationTime]).catch(e => {
+            //       alert('scheduleTask插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        this.scheduleDetailList.forEach(function (v) {
+          promises.push(db.executeSql('select 1 from scheduleDetail where id =?', [v.id]).then((sd) => {
+            // if (sd.rows.length > 0) {
+            //   db.executeSql('update scheduleDetail set taskId=?,scheduleId=?,employeeId=?,growerId=?,visitNum=?,completeNum=?,status=?,scheduleTaskId=?,employeeName=?,growerName=?,creationTime=? where id =?'
+            //     , [v.taskId, v.scheduleId, v.employeeId, v.growerId, v.visitNum, v.completeNum, v.status, v.scheduleTaskId, v.employeeName, v.growerName, v.creationTime, v.id]).catch(e => {
+            //       alert('scheduleDetail更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO scheduleDetail(id,taskId,scheduleId,employeeId,growerId,visitNum,completeNum,status,scheduleTaskId,employeeName,growerName,creationTime) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
+            //     , [v.id, v.taskId, v.scheduleId, v.employeeId, v.growerId, v.visitNum, v.completeNum, v.status, v.scheduleTaskId, v.employeeName, v.growerName, v.creationTime]).catch(e => {
+            //       alert('scheduleDetail插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        this.growerList.forEach(function (v) {
+          promises.push(db.executeSql('select 1 from grower where id =?', [v.id]).then((g) => {
+            // if (g.rows.length > 0) {
+            //   db.executeSql('update grower set year=?,unitCode=?,unitName=?,name=?,countyCode=?,employeeId=?,contractNo=?,villageGroup=?,tel=?,address=?,type=?,plantingArea=?,longitude=?,latitude=?,isEnable=?,collectNum=?,employeeName=?,areaCode=?,areaScheduleDetailId=?,contractTime=?,unitVolume=?,actualArea=?,areaStatus=?,areaTime=? where id =?'
+            //     , [v.year, v.unitCode, v.unitName, v.name, v.countyCode, v.employeeId, v.contractNo, v.villageGroup, v.tel, v.address, v.type, v.plantingArea, v.longitude, v.latitude, v.isEnable, v.collectNum, v.employeeName, v.areaCode, v.areaScheduleDetailId, v.contractTime, v.unitVolume, v.actualArea, v.areaStatus, v.areaTime, v.id]).catch(e => {
+            //       alert('grower更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO grower(id,year,unitCode,unitName,name,countyCode,employeeId,contractNo,villageGroup,tel,address,type,plantingArea,longitude,latitude,isEnable,collectNum,employeeName,areaCode,areaScheduleDetailId,contractTime,unitVolume,actualArea,areaStatus,areaTime) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+            //     , [v.id, v.year, v.unitCode, v.unitName, v.name, v.countyCode, v.employeeId, v.contractNo, v.villageGroup, v.tel, v.address, v.type, v.plantingArea, v.longitude, v.latitude, v.isEnable, v.collectNum, v.employeeName, v.areaCode, v.areaScheduleDetailId, v.contractTime, v.unitVolume, v.actualArea, v.areaStatus, v.areaTime]).catch(e => {
+            //       alert('grower插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        this.growerAreaRecordList.forEach(function (v) {
+          promises.push(db.executeSql('select 1 from growerAreaRecords where id =?', [v.id]).then((gar) => {
+            // if (gar.rows.length > 0) {
+            //   db.executeSql('update growerAreaRecords set growerId=?,scheduleDetailId=?,imgPath=?,longitude=?,latitude=?,location=?,employeeName=?,employeeId=?,collectionTime=?,area=?,remark=?,isOnline=? where id =?'
+            //     , [v.growerId, v.scheduleDetailId, v.imgPath, v.longitude, v.latitude, v.location, v.employeeName, v.employeeId, v.collectionTime, v.area, v.remark, v.id, 1]).catch(e => {
+            //       alert('growerAreaRecords更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO growerAreaRecords(id,growerId,scheduleDetailId,imgPath,longitude,latitude,location,employeeName,employeeId,collectionTime,area,remark,isOnline) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'
+            //     , [v.id, v.growerId, v.scheduleDetailId, v.imgPath, v.longitude, v.latitude, v.location, v.employeeName, v.employeeId, v.collectionTime, v.area, v.remark, 1]).catch(e => {
+            //       alert('growerAreaRecords插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        this.growerLocationLogList.forEach(function (v) {
+          promises.push(db.executeSql('select 1 from growerLocationLogs where id =?', [v.id]).then((gl) => {
+            // if (gl.rows.length > 0) {
+            //   db.executeSql('update growerLocationLogs set employeeId=?,growerId=?,longitude=?,latitude=?,creationTime=?,isOnline= ? where id=?'
+            //     , [v.employeeId, v.growerId, v.longitude, v.latitude, v.creationTime, v.id, 1]).catch(e => {
+            //       alert('growerLocationLogs更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO growerLocationLogs(id,employeeId,growerId,longitude,latitude,creationTime,isOnline) VALUES(?,?,?,?,?,?,?)'
+            //     , [v.id, v.employeeId, v.growerId, v.longitude, v.latitude, v.creationTime, 1]).catch(e => {
+            //       alert('growerLocationLogs插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        this.visitTaskList.forEach(function (v) {
+          promises.push(db.executeSql('select 1 from visitTasks where id =?', [v.id]).then((vt) => {
+            // if (vt.rows.length > 0) {
+            //   db.executeSql('update visitTasks set name=?,type=?,isExamine=?,desc=? where id=?'
+            //     , [v.name, v.type, v.isExamine, v.desc, v.id]).catch(e => {
+            //       alert('visitTasks更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO visitTasks(id,name,type,isExamine,desc) VALUES(?,?,?,?,?)'
+            //     , [v.id, v.name, v.type, v.isExamine, v.desc]).catch(e => {
+            //       alert('visitTasks插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        this.visitExamineList.forEach(function (v) {
+          promises.push(db.executeSql('select 1 from visitExamine where id =?', [v.id]).then((ve) => {
+            // if (ve.rows.length > 0) {
+            //   db.executeSql('update visitExamine set visitRecordId=?,employeeId=?,growerId=?,taskExamineId=?,score=?,creationTime=? where id=?'
+            //     , [v.visitRecordId, v.employeeId, v.growerId, v.taskExamineId, v.score, v.creationTime, v.id]).catch(e => {
+            //       alert('visitExamine更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO visitExamine(id,visitRecordId,employeeId,growerId,taskExamineId,score,creationTime) VALUES(?,?,?,?,?,?,?)'
+            //     , [v.id, v.visitRecordId, v.employeeId, v.growerId, v.taskExamineId, v.score, v.creationTime]).catch(e => {
+            //       alert('visitExamine插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        this.visitRecordList.forEach(function (v) {
+          promises.push(db.executeSql('select 1 from visitRecord where id =?', [v.id]).then((vr) => {
+            // if (vr.rows.length > 0) {
+            //   db.executeSql('update visitRecord set scheduleDetailId=?,employeeId=?,growerId=?,signTime=?,location=?,longitude=?,latitude=?,desc=?,imgPath=?,creationTime=? ,isOnline=? where id =?'
+            //     , [v.scheduleDetailId, v.employeeId, v.growerId, v.signTime, v.location, v.longitude, v.latitude, v.desc, v.imgPath, v.creationTime, v.id, 1]).catch(e => {
+            //       alert('visitRecord更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO visitRecord(id,scheduleDetailId,employeeId,growerId,signTime,location,longitude,latitude,desc,imgPath,creationTime,isOnline) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
+            //     , [v.id, v.scheduleDetailId, v.employeeId, v.growerId, v.signTime, v.location, v.longitude, v.latitude, v.desc, v.imgPath, v.creationTime, 1]).catch(e => {
+            //       alert('visitRecord插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        this.taskExamineList.forEach(function (v) {
+          promises.push(db.executeSql('select 1 from taskExamine where id =?', [v.id]).then((te) => {
+            // if (te.rows.length > 0) {
+            //   db.executeSql('update taskExamine set taskId=?,name=?,desc=?,seq=?,examineOption=?,creationTime=? where id =?'
+            //     , [v.taskId, v.name, v.desc, v.seq, v.examineOption, v.creationTime, v.id]).catch(e => {
+            //       alert('taskExamine更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO taskExamine(id,taskId,name,desc,seq,examineOption,creationTime) VALUES(?,?,?,?,?,?,?)'
+            //     , [v.id, v.taskId, v.name, v.desc, v.seq, v.examineOption, v.creationTime]).catch(e => {
+            //       alert('taskExamine插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        this.systemDataList.forEach(function (v) {
+          alert(v.id);
+          promises.push(db.executeSql('select 1 from systemData where id =?', [v.id]).then((sd) => {
+            // if (sd.rows.length > 0) {
+            //   db.executeSql('update systemData set modelId=?,type=?,code=?,desc=?,remark=?,seq=?,creationTime=? where id =?'
+            //     , [v.modelId, v.type, v.code, v.desc, v.remark, v.seq, v.creationTime, v.id]).catch(e => {
+            //       alert('systemData更新异常' + JSON.stringify(e));
+            //     });
+            // } else {
+            //   db.executeSql('INSERT INTO systemData(id,modelId,type,code,desc,remark,seq,creationTime) VALUES(?,?,?,?,?,?,?,?)'
+            //     , [v.id, v.modelId, v.type, v.code, v.desc, v.remark, v.seq, v.creationTime]).catch(e => {
+            //       alert('systemData插入异常' + JSON.stringify(e));
+            //     });
+            // }
+          }));
+        });
+        Promise.all(promises).then((pro) => {
+          alert(JSON.stringify(pro));
+          resolve(pro);
+        });
+      });
+    });
   }
 
   async insertData() {
@@ -295,22 +498,25 @@ export class Tab1Page {
         })
       })
       // alert('all');
-    }).then(async () => {
+    }).then((res) => {
+      // alert(JSON.stringify(res));
+
       // await this.refreshData().then(async () => {
       // alert(5);
       this.loading = false;
-      await this.toastController.create({
+      this.toastController.create({
         color: 'dark',
         duration: 3000,
-        message: '任务下载成功',
+        message: '任务下载成功，请下拉屏幕刷新数据',
         showCloseButton: false,
         position: 'middle'
       }).then(toast => {
         toast.present();
-      }).then(() => {
-        this.refreshData();
-        // })
-      });
+      })
+    }).then(() => {
+      // alert(1);
+      // this.refreshData();
+      // })
     }).catch(() => {
       this.loading = false;
       this.toastController.create({
@@ -323,30 +529,45 @@ export class Tab1Page {
         toast.present();
       })
     });
-
-    // .then(async () => {
-    //   // alert('刷新数据');
-    //   await this.refreshData().then(() => {
-    //     // .then(() => {
-    //     // alert('弹框');
-    //     this.toastController.create({
-    //       color: 'dark',
-    //       duration: 3000,
-    //       message: '任务下载成功',
-    //       showCloseButton: false,
-    //       position: 'middle'
-    //     }).then(toast => {
-    //       toast.present();
-    //     })
-    //     // })
-    //   })
-    // })
   }
+  async ggg() {
+    const a = await this.newdow();
+    alert('a' + JSON.stringify(a));
+    const b = await this.newInsert();
+    alert('b' + JSON.stringify(b));
+    const c = await this.newrefreshData();
+    alert('c' + JSON.stringify(c));
+  }
+
+  newdow(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.loading = true;
+      let params: any = {};
+      params.userId = this.userInfo.id;
+      this.onLineService.getCurrentTask(params).subscribe((result: any) => {
+        const promises = [];
+        promises.push(this.scheduleList = Schedule.fromJSArray(result.scheduleList));
+        promises.push(this.scheduleDetailList = ScheduleDetail.fromJSArray(result.scheduleDetailList));
+        promises.push(this.scheduleTaskList = ScheduleTask.fromJSArray(result.scheduleTaskList));
+        promises.push(this.growerList = Grower.fromJSArray(result.growerList));
+        promises.push(this.growerLocationLogList = GrowerLocationLogs.fromJSArray(result.growerLocationLogList));
+        promises.push(this.growerAreaRecordList = GrowerAreaRecord.fromJSArray(result.growerAreaRecordList));
+        Promise.all(promises).then((pro) => {
+          resolve(pro);
+        }).catch(() => { reject('与服务器失去连接，请重试'); })
+      });
+    }).catch(() => {
+      reject('与服务器失去连接，请重试');
+      alert('与服务器失去连接，请重试')
+    });
+  }
+
 
   async downLoad() {
     this.loading = true;
     let params: any = {};
-    params.userId = '1926112826844702';
+    // params.userId = '1926112826844702';
+    params.userId = this.userInfo.id;
     await this.onLineService.getCurrentTask(params).subscribe(async (result: any) => {
       // const dataList = result;
       this.scheduleList = Schedule.fromJSArray(result.scheduleList);
@@ -362,11 +583,6 @@ export class Tab1Page {
       this.systemDataList = SystemData.fromJSArray(result.systemDataList);
       await this.insertData();
     })
-    await this.test();
-    // alert(this.growerList);
-  }
-  async test() {
-    // alert('finally');
   }
 
   getData() {
@@ -379,13 +595,13 @@ export class Tab1Page {
     //   location: 'default'
     // })
     //   .then((db: SQLiteObject) => {
-    //     db.executeSql('select * from growerAreaRecords', [])
+    //     db.executeSql('select * from employee', [])
     //       .then((res) => {
     //         alert(JSON.stringify(res));
-    //         alert(JSON.stringify(res.rows.item(0).location));
-    //         alert(JSON.stringify(res.rows.item(1).location));
-    //         alert(JSON.stringify(res.rows.item(2).location));
-    //         alert(JSON.stringify(res.rows.item(3).location));
+    //         // alert(JSON.stringify(res.rows.item(0).location));
+    //         // alert(JSON.stringify(res.rows.item(1).location));
+    //         // alert(JSON.stringify(res.rows.item(2).location));
+    //         // alert(JSON.stringify(res.rows.item(3).location));
     //         // alert(res.rows.item(0));
     //       }).catch(e => {
     //         alert('123' + JSON.stringify(e));
@@ -393,5 +609,12 @@ export class Tab1Page {
     //   }).catch(e => {
     //     alert(JSON.stringify(e));
     //   })
+  }
+
+  doRefresh(event) {
+    setTimeout(() => {
+      this.refreshData();
+      event.target.complete();
+    }, 1000);
   }
 }

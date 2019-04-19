@@ -41,6 +41,16 @@ export class VisitExamine {
         result.init(data);
         return result;
     }
+    static fromJSArraySQL(dataArray: any): VisitExamine[] {
+        let array = [];
+        for (var i = 0; i < dataArray.rows.length; i++) {
+            let item = new VisitExamine();
+            item.init(dataArray.rows.item(i));
+            array.push(item);
+        }
+        return array;
+    }
+
     static fromJSArray(dataArray: any[]): VisitExamine[] {
         let array = [];
         dataArray.forEach(result => {

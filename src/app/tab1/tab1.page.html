@@ -1,11 +1,19 @@
 <ion-header>
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button [text]="buttonText" [icon]="buttonIcon">
+      </ion-back-button>
+    </ion-buttons>
     <ion-title>
       任务拜访
     </ion-title>
   </ion-toolbar>
 </ion-header>
+
 <ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
   <ion-card class="welcome-card">
     <!-- <ion-card-header style="padding-top:0px;padding-bottom:0px;">
       <ion-card-title>
@@ -28,10 +36,10 @@
         <ion-row>
           <ion-col style="line-height:40px;">
             <ion-card-title>
-              杨帆
+              {{userInfo.name}}
             </ion-card-title>
             <ion-card-content style="padding: 6px 0px;">
-              广元市-软件工程师
+              {{userInfo.area + '-' + userInfo.position}}
             </ion-card-content>
           </ion-col>
           <ion-col>
@@ -40,16 +48,16 @@
         </ion-row>
       </ion-grid>
     </ion-card-header>
-
   </ion-card>
+
   <ion-list lines="none" *ngIf="scheduleTaskDtoList.length > 0">
     <ion-list-header>
       <ion-label>当前任务列表</ion-label>
     </ion-list-header>
     <ion-item *ngFor="let item of scheduleTaskDtoList" (click)="goDetails(item.id)">
-      <ion-avatar slot="start">
-        <img src="assets/icon/warn_y.png">
-      </ion-avatar>
+      <ion-thumbnail slot="start">
+        <ion-img src="{{item.thumb}}"></ion-img>
+      </ion-thumbnail>
       <ion-label>
         <h2>{{item.title}}</h2>
         <p>截止时间：{{item.endTime| date:'yyyy-MM-dd'}} | {{item.extra}}</p>
@@ -98,9 +106,7 @@
   <div class="item ddcenter page-margin page-padding" *ngIf="scheduleTaskDtoList.length == 0">
     <ion-img src="assets/icon/nodata-search.png"></ion-img>
     <p style="color:gray; margin-top:10px;">没有待拜访的任务</p>
+    <!-- <p style="color:gray; font-size: 14px">请向下滑动屏幕刷新数据</p> -->
   </div>
-  <!-- <ion-button (click)="search()">任务获取</ion-button> -->
-  <ion-button (click)="getData()">数据查询</ion-button>
-  <!-- <ion-button (click)="refreshData()">装载数据</ion-button> -->
-  <ion-button (click)="location()">定位</ion-button>
+  <!-- <ion-button (click)="getData()">删库</ion-button> -->
 </ion-content>

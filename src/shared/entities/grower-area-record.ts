@@ -50,7 +50,17 @@ export class GrowerAreaRecord implements IGrowerAreaRecord {
         return result;
     }
 
-    static fromJSArray(dataArray: any[]): GrowerAreaRecord[] {
+    static fromJSArraySQL(dataArray: any): GrowerAreaRecord[] {
+        let array = [];
+        for (var i = 0; i < dataArray.rows.length; i++) {
+            let item = new GrowerAreaRecord();
+            item.init(dataArray.rows.item(i));
+            array.push(item);
+        }
+        return array;
+    }
+
+    static fromJSArray(dataArray: any): GrowerAreaRecord[] {
         let array = [];
         dataArray.forEach(result => {
             let item = new GrowerAreaRecord();

@@ -35,7 +35,7 @@ export class AreaPage {
     }
 
     location() {
-        this.showMessage = '正在获取,请耐心等待...';
+        this.showMessage = '正在获取位置信息,请勿重复点击...';
         this.gaoDeLocation.getCurrentPosition()
             .then(async (res: PositionOptions) => {
                 if (res.status == '定位失败') {
@@ -88,6 +88,7 @@ export class AreaPage {
         });
     }
     async save() {
+        var areaReg = /^(?:[1-9]\d*|0)(?:\.\d{1,2})?$/;
         this.areaRecordInput.imgPaths = this.photos.join(',');
         // alert(this.areaRecordInput.imgPaths);
         if (!this.areaRecordInput.remark) {
@@ -122,7 +123,15 @@ export class AreaPage {
             await alert.present();
             return;
         }
-
+        if (!areaReg.test(this.areaRecordInput.area.toString())) {
+            const alert = await this.alertController.create({
+                header: '亲',
+                message: '请确保格式正确',
+                buttons: ['确定']
+            });
+            await alert.present();
+            return;
+        }
         await this.sqlite.create({
             name: 'taskDB.db',
             location: 'default'
@@ -140,7 +149,9 @@ export class AreaPage {
                 }).then(() => {
                     db.executeSql('update scheduleDetail set Status=? where Id=?'
                         , [2, this.id]).then((res) => {
-                            const currentTime = new Date().toISOString();
+                            // const currentTime = new Date().toISOString();
+                            var date = new Date();
+                            const currentTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
                             // alert(currentTime.toISOString());
                             const garId = uuidv1();
                             db.executeSql('INSERT INTO growerAreaRecords (id,growerId,scheduleDetailId,imgPath,longitude,latitude,location,employeeName,employeeId,collectionTime,area,remark,isOnline) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'
