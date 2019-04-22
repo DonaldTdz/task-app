@@ -38,6 +38,7 @@ export class AreaPage {
         this.showMessage = '正在获取位置信息,请勿重复点击...';
         this.gaoDeLocation.getCurrentPosition()
             .then(async (res: PositionOptions) => {
+                // alert(JSON.stringify(res));
                 if (res.status == '定位失败') {
                     this.showMessage = '定位失败,请重新定位...';
                     alert('定位失败，请尝试开启权限或在露天场所再次尝试');
