@@ -105,6 +105,7 @@ export class Tab2Page {
     this.num = 1;
     this.loading = true;
     for (const item of this.list) {
+<<<<<<< HEAD
       try {
         const sd = await this.getTaskInfo(item.id);
         // alert('sd' + JSON.stringify(sd));
@@ -133,6 +134,29 @@ export class Tab2Page {
       } catch{
         this.loading = false; this.errorMsg(); continue;
       }
+=======
+      const sd = await this.getTaskInfo(item.id).catch(() => { this.loading = false; this.errorMsg();return; });
+      // alert('sd' + JSON.stringify(sd));
+      const gll = await this.getGLL(sd, this.num, this.list.length).catch(() => { this.loading = false; this.errorMsg();return; });
+      // alert('gll' + JSON.stringify(gll));
+      const td = await this.getTaskDetail(gll).catch(() => { this.loading = false; this.errorMsg();return; });
+      // alert('td' + JSON.stringify(td));
+      const te = await this.getTaskExamine(td).catch(() => { this.loading = false; this.errorMsg();return; });
+      // alert('te' + JSON.stringify(te));
+      await this.goServer(te).catch(() => { this.loading = false; this.errorMsg();return; });
+      // alert('将要删除的内容3' + JSON.stringify(te));
+      await this.delete(this.tempParams).catch(() => { this.loading = false; this.errorMsg();return; });
+      // alert(4);
+      const toast = await this.toastController.create({
+        color: 'dark',
+        duration: 3000,
+        message: '数据上传成功',
+        showCloseButton: false,
+        position: 'middle'
+      });
+      await toast.present();
+      await this.num++;
+>>>>>>> 941c02e40af36d233f347f2700a6d44939877563
     }
     this.loading = false;
   }
