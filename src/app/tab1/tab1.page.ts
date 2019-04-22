@@ -303,16 +303,16 @@ export class Tab1Page {
             db.executeSql('update schedule set desc=?,type=?,beginTime=?,endTime=?,status=?,publishTime=?,creationTime=?,name=? where id=?'
               , [v.desc, v.type, v.beginTime, v.endTime, v.status, v.publishTime, v.creationTime, v.name, v.id]).catch(e => {
                 alert('schedule更新异常' + JSON.stringify(e));
-              })
+              });
           } else {
             // alert('schedule  3');
             db.executeSql('INSERT INTO schedule(id,desc,type,beginTime,endTime,status,publishTime,creationTime,name) VALUES(?,?,?,?,?,?,?,?,?)'
               , [v.id, v.desc, v.type, v.beginTime, v.endTime, v.status, v.publishTime, v.creationTime, v.name]).catch(e => {
                 alert('schedule插入异常' + JSON.stringify(e));
-              })
+              });
           }
         }).catch((e) => { alert('schedule' + JSON.stringify(e)); })
-      })
+      });
       this.scheduleTaskList.forEach(v => {
         db.executeSql('select 1 from scheduleTask where id =?', [v.id]).then((st) => {
           //  alert(JSON.stringify(st));
@@ -321,34 +321,36 @@ export class Tab1Page {
             db.executeSql('update scheduleTask set taskId=?,scheduleId=?,visitNum=?,taskName=?,creationTime=? where id =?'
               , [v.taskId, v.scheduleId, v.visitNum, v.taskName, v.creationTime, v.id]).catch(e => {
                 alert('scheduleTask更新异常' + JSON.stringify(e));
-              })
+              });
           } else {
             // alert('scheduleTask 2');
             db.executeSql('INSERT INTO scheduleTask(id,taskId,scheduleId,visitNum,taskName,creationTime) VALUES(?,?,?,?,?,?)'
               , [v.id, v.taskId, v.scheduleId, v.visitNum, v.taskName, v.creationTime]).catch(e => {
                 alert('scheduleTask插入异常' + JSON.stringify(e));
-              })
+              });
           }
-        })
-      })
+        });
+      });
       this.scheduleDetailList.forEach(v => {
-        db.executeSql('select 1 from scheduleDetail where id =?', [v.id]).then((sd) => {
+        db.executeSql('select status from scheduleDetail where id =?', [v.id]).then((sd) => {
           //  alert(JSON.stringify(sd));
           if (sd.rows.length > 0) {
             // alert('scheduleDetail 2');
-            db.executeSql('update scheduleDetail set taskId=?,scheduleId=?,employeeId=?,growerId=?,visitNum=?,completeNum=?,status=?,scheduleTaskId=?,employeeName=?,growerName=?,creationTime=? where id =?'
-              , [v.taskId, v.scheduleId, v.employeeId, v.growerId, v.visitNum, v.completeNum, v.status, v.scheduleTaskId, v.employeeName, v.growerName, v.creationTime, v.id]).catch(e => {
-                alert('scheduleDetail更新异常' + JSON.stringify(e));
-              })
+            if (sd.rows.item(0).status == 1) {
+              db.executeSql('update scheduleDetail set taskId=?,scheduleId=?,employeeId=?,growerId=?,visitNum=?,completeNum=?,status=?,scheduleTaskId=?,employeeName=?,growerName=?,creationTime=? where id =?'
+                , [v.taskId, v.scheduleId, v.employeeId, v.growerId, v.visitNum, v.completeNum, v.status, v.scheduleTaskId, v.employeeName, v.growerName, v.creationTime, v.id]).catch(e => {
+                  alert('scheduleDetail更新异常' + JSON.stringify(e));
+                });
+            }
           } else {
             // alert('scheduleDetail 2');
             db.executeSql('INSERT INTO scheduleDetail(id,taskId,scheduleId,employeeId,growerId,visitNum,completeNum,status,scheduleTaskId,employeeName,growerName,creationTime) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
               , [v.id, v.taskId, v.scheduleId, v.employeeId, v.growerId, v.visitNum, v.completeNum, v.status, v.scheduleTaskId, v.employeeName, v.growerName, v.creationTime]).catch(e => {
                 alert('scheduleDetail插入异常' + JSON.stringify(e));
-              })
+              });
           }
-        })
-      })
+        });
+      });
       this.growerList.forEach(v => {
         db.executeSql('select 1 from grower where id =?', [v.id]).then((g) => {
           //  alert(JSON.stringify(g));
@@ -357,16 +359,16 @@ export class Tab1Page {
             db.executeSql('update grower set year=?,unitCode=?,unitName=?,name=?,countyCode=?,employeeId=?,contractNo=?,villageGroup=?,tel=?,address=?,type=?,plantingArea=?,longitude=?,latitude=?,isEnable=?,collectNum=?,employeeName=?,areaCode=?,areaScheduleDetailId=?,contractTime=?,unitVolume=?,actualArea=?,areaStatus=?,areaTime=? where id =?'
               , [v.year, v.unitCode, v.unitName, v.name, v.countyCode, v.employeeId, v.contractNo, v.villageGroup, v.tel, v.address, v.type, v.plantingArea, v.longitude, v.latitude, v.isEnable, v.collectNum, v.employeeName, v.areaCode, v.areaScheduleDetailId, v.contractTime, v.unitVolume, v.actualArea, v.areaStatus, v.areaTime, v.id]).catch(e => {
                 alert('grower更新异常' + JSON.stringify(e));
-              })
+              });
           } else {
             //  alert('grower 3');
             db.executeSql('INSERT INTO grower(id,year,unitCode,unitName,name,countyCode,employeeId,contractNo,villageGroup,tel,address,type,plantingArea,longitude,latitude,isEnable,collectNum,employeeName,areaCode,areaScheduleDetailId,contractTime,unitVolume,actualArea,areaStatus,areaTime) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
               , [v.id, v.year, v.unitCode, v.unitName, v.name, v.countyCode, v.employeeId, v.contractNo, v.villageGroup, v.tel, v.address, v.type, v.plantingArea, v.longitude, v.latitude, v.isEnable, v.collectNum, v.employeeName, v.areaCode, v.areaScheduleDetailId, v.contractTime, v.unitVolume, v.actualArea, v.areaStatus, v.areaTime]).catch(e => {
                 alert('grower插入异常' + JSON.stringify(e));
-              })
+              });
           }
-        })
-      })
+        });
+      });
       this.growerAreaRecordList.forEach(v => {
         db.executeSql('select 1 from growerAreaRecords where id =?', [v.id]).then((gar) => {
           //  alert(JSON.stringify(gar));

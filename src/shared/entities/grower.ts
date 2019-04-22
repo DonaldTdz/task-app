@@ -97,6 +97,16 @@ export class Grower {
         return result;
     }
 
+    static fromJSArraySQL(dataArray: any): Grower[] {
+        let array = [];
+        for (var i = 0; i < dataArray.rows.length; i++) {
+            let item = new Grower();
+            item.init(dataArray.rows.item(i));
+            array.push(item);
+        }
+        return array;
+    }
+
     static fromJSArray(dataArray: any[]): Grower[] {
         let array = [];
         dataArray.forEach(result => {

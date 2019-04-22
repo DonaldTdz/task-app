@@ -3,7 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
 import { VisitGrowerDetailDto } from 'src/shared/entities/visit-grower-detail-dto';
 import * as moment from 'moment';
-import { VisitRecordDto, Grower, Employee } from 'src/shared/entities';
+import { VisitRecordDto, Grower, Employee, GrowerLocationLogs } from 'src/shared/entities';
 import { AlertController, ToastController, NavController } from '@ionic/angular';
 import { GaoDeLocation, PositionOptions } from '@ionic-native/gao-de-location/ngx';
 import { UserInfoService } from 'src/services';
@@ -24,11 +24,12 @@ export class VisitPage {
     plongitude = 0;
     platitude = 0;
     lastNum = 0;
+    goVisitMsg: string = '去拜访';
     visitGrowerDetailDto: VisitGrowerDetailDto = new VisitGrowerDetailDto();
     // userId = '1926112826844702';
     userInfo: Employee;
-
-    signRange: any;
+    recordList: GrowerLocationLogs[] = [];
+    signRange: number;
     constructor(private router: Router
         , private actRouter: ActivatedRoute
         , private sqlite: SQLite
@@ -47,6 +48,7 @@ export class VisitPage {
     }
 
     async ionViewWillEnter() {
+        this.goVisitMsg = '去拜访';
         this.userInfo = await this.settingsService.getUserInfo();
         this.getVisitGrowerDetail();
     }
@@ -57,6 +59,7 @@ export class VisitPage {
         }).then((db: SQLiteObject) => {
             db.executeSql('SELECT sd.Id id,s.Name scheduleName,t.Name taskName,t.Type taskType,sd.GrowerId growerId,sd.VisitNum visitNum,sd.CompleteNum completeNum,sd.Status scheduleStatus,s.BeginTime beginTime,s.EndTime endTime FROM scheduleDetail sd inner join visitTasks t on sd.TaskId = t.Id inner join schedule s on sd.ScheduleId = s.Id where sd.Id = ?'
                 , [this.id]).then((res) => {
+                    // alert(res.rows.item(0).scheduleStatus);
                     if (res.rows.length > 0) {
                         this.visitGrowerDetailDto = VisitGrowerDetailDto.fromJS(res.rows.item(0));
                         db.executeSql('select * from grower where id =?', [this.visitGrowerDetailDto.growerId]).then((g) => {
@@ -169,7 +172,8 @@ export class VisitPage {
     }
     goVisit() {
         //TODO 验证
-        this.router.navigate(['/tabs/tab1/go-visit', this.id]);
+        this.validateLocation();
+        // this.router.navigate(['/tabs/tab1/go-visit', this.id]);
     }
     goArea() {
         this.router.navigate(['/tabs/tab1/area', this.id]);
@@ -224,7 +228,7 @@ export class VisitPage {
                             // alert(JSON.stringify(res));
                         }).catch((e) => {
                             alert('计划详情更新异常信息' + JSON.stringify(e));
-                        })
+                        });
                     // alert(areaTime);
                 }).then(() => {
                     db.executeSql('select SUM(g.Area) sumArea from growerAreaRecords g where g.GrowerId =? and g.ScheduleDetailId = ?'
@@ -235,11 +239,12 @@ export class VisitPage {
                             }
                         }).catch((e) => {
                             alert('面积统计异常信息' + JSON.stringify(e));
-                        })
+                        });
                 }).then(() => {
                     // var curTime = new Date().toISOString();
                     var date = new Date();
                     var curTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
+                    this.visitGrowerDetailDto.scheduleStatus = 3;
                     db.executeSql('update grower set AreaStatus=?,AreaTime=?,ActualArea=?,AreaScheduleDetailId=? where Id=?'
                         , [1, curTime, sumArea, this.id]).then(() => {
                             // alert('f');
@@ -247,8 +252,8 @@ export class VisitPage {
                         })
                 }).catch((e) => {
                     alert('烟农落实异常信息' + JSON.stringify(e));
-                })
-        })
+                });
+        });
     }
 
     async location() {
@@ -282,7 +287,7 @@ export class VisitPage {
                 this.plongitude = res.longitude;
                 const alert = await this.alertController.create({
                     header: '定位成功',
-                    message: `当前经纬度${res.longitude, res.latitude}`,
+                    message: `当前经纬度${res.longitude.toFixed(3)},${res.latitude.toFixed(3)}`,
                     buttons: ['确定']
                 });
                 await alert.present();
@@ -307,7 +312,7 @@ export class VisitPage {
                         }).then(() => {
                             // alert(this.visitGrowerDetailDto.growerInfo.collectNum)
                             db.executeSql('update grower set collectNum=?,longitude=?,latitude=? where Id=?'
-                                , [this.visitGrowerDetailDto.growerInfo.collectNum + 1, this.plongitude, this.platitude, this.visitGrowerDetailDto.growerId]).then((g) => {
+                                , [this.visitGrowerDetailDto.growerInfo.collectNum + 1, this.plongitude.toFixed(6), this.platitude.toFixed(6), this.visitGrowerDetailDto.growerId]).then((g) => {
                                     this.toastController.create({
                                         color: 'dark',
                                         duration: 3e10,
@@ -332,50 +337,100 @@ export class VisitPage {
         });
     }
 
-    // validateLocation(latGrower: any, lonGrower: any, empId: string, growerId: any) {
-    //     this.gaoDeLocation.getCurrentPosition().then(async (res: PositionOptions) => {
-    //         const alert = await this.alertController.create({
-    //             header: '定位成功',
-    //             message: `当前经纬度${res.longitude, res.latitude}`,
-    //             buttons: ['确定']
-    //         });
-    //         await alert.present();
-    //     }).catch((error) => {
-    //         alert('定位失败，请尝试开启权限或在露天场所再次尝试');
-    //     }).then(() => {
-    //         this.sqlite.create({
-    //             name: 'taskDB.db',
-    //             location: 'default'
-    //         }).then((db: SQLiteObject) => {
-    //             db.executeSql('select s.[Desc] desc from systemData s where s.ModelId =2 and s.Type =5 and s.Code = "SignRange"', []).then((res) => {
-    //                 this.signRange = res.rows.item(0).desc;
-    //             }).catch((e) => {
-    //                 alert('烟农采集位置条件获取失败' + JSON.stringify(e));
-    //             })
-    //         })
-    //     })
-    // }
+    validateLocation() {
+        this.gaoDeLocation.getCurrentPosition().then(async (res: PositionOptions) => {
+            this.goVisitMsg = '正在获取位置信息,请勿重复点击...'
+            if (res.status == '定位失败') {
+                alert('定位失败，请尝试开启权限或在露天场所再次尝试');
+                this.goVisitMsg = '定位失败,请重新定位...';
+                reject(null);
+                return;
+            } else {
+                // const alert = await this.alertController.create({
+                //     header: '定位成功',
+                //     message: `当前经纬度${res.longitude.toFixed(3)},${res.latitude.toFixed(3)}`,
+                //     buttons: ['确定']
+                // });
+                // await alert.present();
+                if (res.longitude && res.latitude) {
+                    this.isInRange(res.latitude, res.longitude, this.visitGrowerDetailDto.growerInfo.latitude, this.visitGrowerDetailDto.growerInfo.longitude);
+                }
+            }
+        }).catch((error) => {
+            alert('定位失败，请尝试开启权限或在露天场所再次尝试');
+        });
+    }
 
-    //范围判断
-    // private addGeofence() {
-    //     //options describing geofence
-    //     let fence = {
-    //       id: uuidv1(), //any unique ID
-    //       latitude:       37.285951, //center of geofence radius
-    //       longitude:      -121.936650,
-    //       radius:         100, //radius to edge of geofence in meters
-    //       transitionType: 1, //see 'Transition Types' below
-    //       notification: { //notification settings
-    //           id:             1, //any unique ID
-    //           title:          'You crossed a fence', //notification title
-    //           text:           'You just arrived to Gliwice city center.', //notification body
-    //           openAppOnClick: true //open app when notification is tapped
-    //       }
-    //     }
+    isInRange(lat, lon, latGrower, lonGrower) {
+        this.sqlite.create({
+            name: 'taskDB.db',
+            location: 'default'
+        }).then((db: SQLiteObject) => {
+            db.executeSql('select s.[Desc] desc from systemData s where s.ModelId =2 and s.Type =5 and s.Code = "SignRange"', []).then((res) => {
+                if (res.rows.length > 0) {
+                    this.signRange = res.rows.item(0).desc;
+                } else {
+                    this.signRange = 500; //m
+                }
+                var distance = this.getDistance(lat, lon, latGrower, lonGrower);
+                // alert('1' + distance);
+                if (distance < this.signRange) {
+                    this.router.navigate(['/tabs/tab1/go-visit', this.id]);
+                } else {
+                    // alert(2);
+                    db.executeSql('select * from growerLocationLogs where employeeId =? and growerId=?', [this.userInfo.id, this.visitGrowerDetailDto.growerId]).then((res) => {
+                        if (res.rows.length > 0) {
+                            for (var i = 0; i < res.rows.length; i++) {
+                                // alert('In');
+                                var temp = this.getDistance(lat, lon, res.rows.item(i).latitude, res.rows.item(i).longitude);
+                                // alert(temp);
+                                if (temp < this.signRange) {
+                                    this.router.navigate(['/tabs/tab1/go-visit', this.id]);
+                                    return;
+                                }
+                            }
+                        }
+                        this.notInRangeMessage();
+                    });
+                }
+            }).catch((e) => {
+                alert('烟农采集位置条件获取失败' + JSON.stringify(e));
+            });
+        })
+    }
 
-    //     this.geofence.addOrUpdate(fence).then(
-    //        () => console.log('Geofence added'),
-    //        (err) => console.log('Geofence failed to add')
-    //      );
-    //   }
+    async notInRangeMessage() {
+        const alert = await this.alertController.create({
+            header: '亲',
+            message: '当前位置不在拜访位置范围内,请重新定位',
+            buttons: [
+                {
+                    text: this.lastNum == 0 ? '确定' : '重新定位',
+                    handler: () => {
+                        if (this.lastNum > 0) {
+                            this.getPosition();
+                        }
+                    }
+                }
+            ]
+        });
+        await alert.present();
+    }
+    rad(d) {
+        return d * Math.PI / 180.0;//经纬度转换成三角函数中度分表形式。
+    }
+
+    //计算距离，参数分别为第一点的纬度，经度；第二点的纬度，经度
+    getDistance(lat1, lng1, lat2, lng2) {
+        var radLat1 = this.rad(lat1);
+        var radLat2 = this.rad(lat2);
+        var a = radLat1 - radLat2;
+        var b = this.rad(lng1) - this.rad(lng2);
+        var s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) +
+            Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+        s = s * 6378137.0;// EARTH_RADIUS;
+        s = Math.round(s * 10000) / 10000; //输出为米
+        //s=s.toFixed(4);
+        return s;
+    }
 }

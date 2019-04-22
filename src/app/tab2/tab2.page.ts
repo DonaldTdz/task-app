@@ -1,7 +1,7 @@
 import { Component, Injector } from '@angular/core';
 import { OnLineService } from 'src/services/on-line/on-line.service';
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
-import { ScheduleDetail, GrowerLocationLogs, GrowerAreaRecord, VisitExamine, VisitRecord, VisitTask, TaskExamine, ScheduleDetailDto, ApiResult, TaskInfoDto, Employee } from 'src/shared/entities';
+import { ScheduleDetail, GrowerLocationLogs, GrowerAreaRecord, VisitExamine, VisitRecord, VisitTask, TaskExamine, ScheduleDetailDto, ApiResult, TaskInfoDto, Employee, Grower } from 'src/shared/entities';
 import { Router } from '@angular/router';
 import { CommonHttpClient } from 'src/services/common-httpclient';
 import { ToastController } from '@ionic/angular';
@@ -52,12 +52,12 @@ export class Tab2Page {
   }
 
   async ionViewWillEnter() {
-    this.num = 1;
     this.userInfo = await this.settingsService.getUserInfo();
     this.refreshData();
   }
 
   async refreshData() {
+    this.num = 1;
     this.list = [];
     this.sqlite.create({
       name: 'taskDB.db',
@@ -95,7 +95,6 @@ export class Tab2Page {
   }
 
   async upload() {
-    this.num = 1;
     await this.getUploadData();
     setTimeout(() => {
       this.refreshData();
@@ -106,27 +105,34 @@ export class Tab2Page {
     this.num = 1;
     this.loading = true;
     for (const item of this.list) {
-      const sd = await this.getTaskInfo(item.id).catch(() => { this.loading = false; this.errorMsg() });
-      // alert('sd' + JSON.stringify(sd));
-      const gll = await this.getGLL(sd, this.num, this.list.length).catch(() => { this.loading = false; this.errorMsg() });
-      // alert('gll' + JSON.stringify(gll));
-      const td = await this.getTaskDetail(gll).catch(() => { this.loading = false; this.errorMsg() });
-      // alert('td' + JSON.stringify(td));
-      const te = await this.getTaskExamine(td).catch(() => { this.loading = false; this.errorMsg() });
-      // alert('te' + JSON.stringify(te));
-      await this.goServer(te).catch(() => { this.loading = false; this.errorMsg() });
-      // alert('将要删除的内容3' + JSON.stringify(te));
-      await this.delete(this.tempParams).catch(() => { this.loading = false; this.errorMsg() });
-      // alert(4);
-      const toast = await this.toastController.create({
-        color: 'dark',
-        duration: 3000,
-        message: '数据上传成功',
-        showCloseButton: false,
-        position: 'middle'
-      });
-      await toast.present();
-      await this.num++;
+      try {
+        const sd = await this.getTaskInfo(item.id);
+        // alert('sd' + JSON.stringify(sd));
+        const gll = await this.getGLL(sd, this.num, this.list.length);
+        // alert('gll' + JSON.stringify(gll));
+        const td = await this.getTaskDetail(gll);
+        // alert('td' + JSON.stringify(td));
+        const te = await this.getTaskExamine(td);
+        // alert('te' + JSON.stringify(te));
+        const g = await this.getGrower(te);
+        // alert('g' + JSON.stringify(g.growerList));
+        await this.goServer(g);
+        // alert('服务器返回内容' + JSON.stringify(gs));
+        // alert('将要删除的内容3' + JSON.stringify(te));
+        await this.delete(this.tempParams);
+        // alert(4);
+        const toast = await this.toastController.create({
+          color: 'dark',
+          duration: 3000,
+          message: '数据上传成功',
+          showCloseButton: false,
+          position: 'middle'
+        });
+        await toast.present();
+        await this.num++;
+      } catch{
+        this.loading = false; this.errorMsg(); continue;
+      }
     }
     this.loading = false;
   }
@@ -169,7 +175,7 @@ export class Tab2Page {
         alert('打开数据库失败' + JSON.stringify(e));
         reject('打开数据库失败');
       });
-    })
+    });
   }
 
   /**
@@ -202,7 +208,7 @@ export class Tab2Page {
         alert('打开数据库失败' + JSON.stringify(e));
         reject('打开数据库失败');
       });
-    })
+    });
   }
 
   /**
@@ -210,7 +216,6 @@ export class Tab2Page {
    * @param taskInfoDto 
    */
   getGLL(taskInfoDto: TaskInfoDto, curNum: number, allNum: number): Promise<any> {
-
     return new Promise<any>((resolve, reject) => {
       if (curNum == allNum) {
         // alert('in' + curNum);
@@ -338,7 +343,31 @@ export class Tab2Page {
         alert('打开数据库失败' + JSON.stringify(e));
         reject('打开数据库失败');
       });
-    })
+    });
+  }
+
+  /**
+   * 查询烟农
+   * @param taskInfoDto 
+   */
+  getGrower(taskInfoDto: TaskInfoDto): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      this.sqlite.create({
+        name: 'taskDB.db',
+        location: 'default'
+      }).then((db: SQLiteObject) => {
+        db.executeSql('select * from grower where id =?', [taskInfoDto.scheduleDetail.growerId]).then((g) => {
+          if (g.rows.length > 0) {
+            taskInfoDto.growerList.push(...Grower.fromJSArraySQL(g));
+          }
+          this.tempParams = taskInfoDto;
+          resolve(taskInfoDto);
+        }).catch((e) => {
+          alert('烟农上传失败' + JSON.stringify(e));
+          reject('烟农上传失败');
+        });
+      });
+    });
   }
 
   /**
@@ -383,7 +412,6 @@ export class Tab2Page {
    */
   goServer(taskInfo: TaskInfoDto): Promise<any> {
     return new Promise<any>((resolve, reject) => {
-      // alert(1);
       //执行完毕数据回传
       let params: any = {};
       params.VisitExamineList = taskInfo.visitExamineList;
@@ -391,16 +419,18 @@ export class Tab2Page {
       params.GrowerAreaRecordList = taskInfo.growerAreaRecordList;
       params.VisitRecordList = taskInfo.visitRecordList;
       params.GrowerLocationLogList = taskInfo.growerLocationLogList;
+      params.GrowerList = taskInfo.growerList;
       params.EmployeeId = this.userInfo.id;
       // alert(JSON.stringify(params));
       this.onLineService.uploadData(params).subscribe((result: ApiResult) => {
-        // alert(JSON.stringify(params));
         if (result.code === 901) {
           resolve(taskInfo);
         } else {
-          reject(null);
+          // alert('reject')
+          reject(false);
         }
       });
-    }).catch(() => { alert('与服务器失去连接，请重试') });
+    });
+    // .catch(() => { alert('与服务器失去连接，请重试') });
   }
 }

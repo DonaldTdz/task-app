@@ -11,7 +11,7 @@ import { NavController } from '@ionic/angular';
     templateUrl: 'task-detail.page.html',
     styleUrls: ['task-detail.page.scss']
 })
-export class TaskDetailPage implements OnInit {
+export class TaskDetailPage {
     id: string;
     taskDetailDto: TaskDetailDto = new TaskDetailDto();
     percent: number = 0;
@@ -27,7 +27,7 @@ export class TaskDetailPage implements OnInit {
         this.id = this.actRouter.snapshot.params['id'];
     }
 
-    async ngOnInit(): Promise<void> {
+    async ionViewWillEnter(): Promise<void> {
         this.userInfo = await this.settingsService.getUserInfo();
         this.getTaskDetail();
     }

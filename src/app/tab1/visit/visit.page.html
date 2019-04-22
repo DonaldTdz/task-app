@@ -103,13 +103,13 @@
         </ion-item>
     </ion-list>
     <div>
-        <div *ngIf="visitGrowerDetailDto.scheduleStatus == 1 || visitGrowerDetailDto.scheduleStatus == 2">
-            <ion-button *ngIf="isGetPosition && visitGrowerDetailDto.taskType != 5" expand="block" (click)="goVisit()">
-                去拜访</ion-button>
-            <ion-button *ngIf="visitGrowerDetailDto.taskType == 5" color="light" expand="block" (click)="goArea()">新增
+        <div *ngIf="visitGrowerDetailDto.scheduleStatus === 1 || visitGrowerDetailDto.scheduleStatus === 2">
+            <ion-button *ngIf="isGetPosition && visitGrowerDetailDto.taskType !== 5" expand="block" (click)="goVisit()">
+                {{goVisitMsg}}</ion-button>
+            <ion-button *ngIf="visitGrowerDetailDto.taskType === 5" color="light" expand="block" (click)="goArea()">新增
             </ion-button>
-            <ion-button *ngIf="visitGrowerDetailDto.taskType == 5"
-                disabled="{{visitGrowerDetailDto.visitRecords.length == 0? true : false}}" expand="block"
+            <ion-button *ngIf="visitGrowerDetailDto.taskType === 5"
+                disabled="{{visitGrowerDetailDto.visitRecords.length === 0? true : false}}" expand="block"
                 (click)="subArea()">提交落实面积
             </ion-button>
         </div>
