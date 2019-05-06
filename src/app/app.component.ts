@@ -46,7 +46,7 @@ export class AppComponent {
           }).then(() => {
             db.executeSql('create table if not exists scheduleTask(id varchar(36) PRIMARY KEY not null,taskId int not null,scheduleId varchar(36) not null,visitNum int,taskName nvarchar(200),creationTime DateTime);', [])
           }).then(() => {
-            db.executeSql('create table if not exists scheduleDetail(id varchar(36) PRIMARY KEY not null,taskId int not null,scheduleId varchar(36) not null,employeeId Long not null,growerId int not null,visitNum int,completeNum int,status int,scheduleTaskId varchar(36) not null,employeeName nvarchar(50),growerName nvarchar(50),creationTime DateTime,areaTime DateTime);', [])
+            db.executeSql('create table if not exists scheduleDetail(id varchar(36) PRIMARY KEY not null,taskId int not null,scheduleId varchar(36) not null,employeeId Long not null,growerId int not null,visitNum int,completeNum int,status int,scheduleTaskId varchar(36) not null,employeeName nvarchar(50),growerName nvarchar(50),creationTime DateTime,areaTime DateTime, isUpload int);', [])
           }).then(() => {
             db.executeSql('create table if not exists visitRecord(id varchar(36) PRIMARY KEY not null,scheduleDetailId varchar(36) not null,employeeId integer,growerId int,signTime DateTime,location nvarchar(200),longitude decimal(18,2),latitude decimal(18,2),desc nvarchar(500),imgPath nvarchar(2000),creationTime DateTime,isOnline int);', [])
           }).then(() => {

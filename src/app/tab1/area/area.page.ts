@@ -19,6 +19,8 @@ export class AreaPage {
     scheduleDetail: ScheduleDetail;
     photos = [];
     showMessage = '正在获取,请耐心等待...';
+    growerName: string = '';
+    bfscrolltop; // 获取软键盘唤起前浏览器滚动部分的高度
     constructor(private actRouter: ActivatedRoute
         , private sqlite: SQLite
         , public alertController: AlertController
@@ -31,7 +33,32 @@ export class AreaPage {
     }
 
     ngOnInit(): void {
+        this.bfscrolltop = document.body.scrollTop;
+        this.getGrowerName();
         this.location();
+    }
+    focusInput() {
+        document.body.scrollTop = document.body.scrollHeight;
+
+    }
+
+    blurInput() {
+        document.body.scrollTop = this.bfscrolltop;
+    }
+
+    getGrowerName() {
+        this.sqlite.create({
+            name: 'taskDB.db',
+            location: 'default'
+        }).then((db: SQLiteObject) => {
+            db.executeSql('select growerName growerName from scheduleDetail where id =?', [this.id]).then((res) => {
+                if (res.rows.length > 0) {
+                    this.growerName = res.rows.item(0).growerName;
+                }
+            }).catch((e) => {
+                alert(JSON.stringify('烟农获取异常' + e));
+            });
+        });
     }
 
     location() {
@@ -148,7 +175,7 @@ export class AreaPage {
                 }).catch((e) => {
                     alert('计划详情查询异常信息' + JSON.stringify(e));
                 }).then(() => {
-                    db.executeSql('update scheduleDetail set Status=? where Id=?'
+                    db.executeSql('update scheduleDetail set Status=?, isUpload =0 where Id=?'
                         , [2, this.id]).then((res) => {
                             // const currentTime = new Date().toISOString();
                             var date = new Date();

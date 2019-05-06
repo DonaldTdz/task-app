@@ -48,7 +48,6 @@ export class VisitPage {
     }
 
     async ionViewWillEnter() {
-        this.goVisitMsg = '去拜访';
         this.userInfo = await this.settingsService.getUserInfo();
         this.getVisitGrowerDetail();
     }
@@ -223,7 +222,7 @@ export class VisitPage {
                     // var areaTime = new Date().toISOString();
                     var date = new Date();
                     var areaTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
-                    db.executeSql('update scheduleDetail set status =?,CompleteNum=?,AreaTime=? where Id= ?'
+                    db.executeSql('update scheduleDetail set status =?,CompleteNum=?,AreaTime=?,isUpload = 0 where Id= ?'
                         , [3, curNum, areaTime, this.id]).then((res) => {
                             // alert(JSON.stringify(res));
                         }).catch((e) => {
@@ -338,14 +337,15 @@ export class VisitPage {
     }
 
     validateLocation() {
+        this.goVisitMsg = '正在获取位置信息,请勿重复点击...'
         this.gaoDeLocation.getCurrentPosition().then(async (res: PositionOptions) => {
-            this.goVisitMsg = '正在获取位置信息,请勿重复点击...'
             if (res.status == '定位失败') {
                 alert('定位失败，请尝试开启权限或在露天场所再次尝试');
                 this.goVisitMsg = '定位失败,请重新定位...';
                 reject(null);
                 return;
             } else {
+                this.goVisitMsg = '去拜访';
                 // const alert = await this.alertController.create({
                 //     header: '定位成功',
                 //     message: `当前经纬度${res.longitude.toFixed(3)},${res.latitude.toFixed(3)}`,
@@ -370,10 +370,11 @@ export class VisitPage {
                 if (res.rows.length > 0) {
                     this.signRange = res.rows.item(0).desc;
                 } else {
-                    this.signRange = 500; //m
+                    this.signRange = 3000; //m
                 }
+                // alert('配置' + this.signRange);
                 var distance = this.getDistance(lat, lon, latGrower, lonGrower);
-                // alert('1' + distance);
+                // alert(distance);
                 if (distance < this.signRange) {
                     this.router.navigate(['/tabs/tab1/go-visit', this.id]);
                 } else {
@@ -408,7 +409,7 @@ export class VisitPage {
                     text: this.lastNum == 0 ? '确定' : '重新定位',
                     handler: () => {
                         if (this.lastNum > 0) {
-                            this.getPosition();
+                            this.location();
                         }
                     }
                 }

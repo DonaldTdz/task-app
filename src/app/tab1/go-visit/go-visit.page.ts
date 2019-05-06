@@ -218,7 +218,7 @@ export class GoVisitPage {
                         }).catch((e) => {
                             alert('计划详情查询异常信息' + JSON.stringify(e));
                         }).then(() => {
-                            db.executeSql('update scheduleDetail set completeNum=?, status=? where id= ?'
+                            db.executeSql('update scheduleDetail set completeNum=?, status=?, isUpload =0 where id= ?'
                                 , [this.currComletetNum, this.currStatus, this.id]).then((res) => {
                                     // alert(JSON.stringify(res));
                                     this.toastController.create({

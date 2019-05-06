@@ -16,6 +16,7 @@ export class ScheduleDetail implements IScheduleDetail {
     percentage: string;
     statusName: string;
     areaTime: Date;
+    isUpload: number;
     constructor(data?: IScheduleDetail) {
         if (data) {
             for (var property in data) {
@@ -44,6 +45,7 @@ export class ScheduleDetail implements IScheduleDetail {
             this.percentage = data["percentage"];
             this.statusName = data["statusName"];
             this.areaTime = data["areaTime"];
+            this.isUpload = data["isUpload"];
         }
     }
 
@@ -80,6 +82,7 @@ export class ScheduleDetail implements IScheduleDetail {
         data["growerName"] = this.growerName;
         data["checked"] = this.checked;
         data["areaTime"] = this.areaTime;
+        data["isUpload"] = this.isUpload;
         return data;
     }
 
@@ -108,4 +111,5 @@ export interface IScheduleDetail {
     percentage: string;
     statusName: string;
     areaTime: Date;
+    isUpload: number;
 }

@@ -76,7 +76,7 @@ export class Tab2Page {
       //     });
       // })
       .then(async (db: SQLiteObject) => {
-        await db.executeSql('select sd.Id id,s.EndTime endTime,sd.GrowerName growerName,sd.Status status,t.Name taskName,t.Type taskType from scheduleDetail sd inner join visitTasks t on sd.TaskId = t.Id inner join schedule s on sd.ScheduleId = s.Id where sd.EmployeeId = ? and (sd.Status = 3 or sd.Status =2) and s.Status =1 order by sd.Status desc'
+        await db.executeSql('select sd.Id id,s.EndTime endTime,sd.GrowerName growerName,sd.Status status,t.Name taskName,t.Type taskType from scheduleDetail sd inner join visitTasks t on sd.TaskId = t.Id inner join schedule s on sd.ScheduleId = s.Id where sd.isUpload = 0 and sd.EmployeeId = ? and (sd.Status = 3 or sd.Status =2) and s.Status =1 order by sd.Status desc'
           , [this.userInfo.id]).then((res) => {
             if (res.rows.length > 0) {
               for (var i = 0; i < res.rows.length; i++) {
@@ -105,11 +105,12 @@ export class Tab2Page {
     this.num = 1;
     this.loading = true;
     for (const item of this.list) {
-<<<<<<< HEAD
       try {
         const sd = await this.getTaskInfo(item.id);
         // alert('sd' + JSON.stringify(sd));
-        const gll = await this.getGLL(sd, this.num, this.list.length);
+        const up = await this.upDateStatus(sd);
+        // alert('up' + JSON.stringify(up));
+        const gll = await this.getGLL(up, this.num, this.list.length);
         // alert('gll' + JSON.stringify(gll));
         const td = await this.getTaskDetail(gll);
         // alert('td' + JSON.stringify(td));
@@ -134,29 +135,6 @@ export class Tab2Page {
       } catch{
         this.loading = false; this.errorMsg(); continue;
       }
-=======
-      const sd = await this.getTaskInfo(item.id).catch(() => { this.loading = false; this.errorMsg();return; });
-      // alert('sd' + JSON.stringify(sd));
-      const gll = await this.getGLL(sd, this.num, this.list.length).catch(() => { this.loading = false; this.errorMsg();return; });
-      // alert('gll' + JSON.stringify(gll));
-      const td = await this.getTaskDetail(gll).catch(() => { this.loading = false; this.errorMsg();return; });
-      // alert('td' + JSON.stringify(td));
-      const te = await this.getTaskExamine(td).catch(() => { this.loading = false; this.errorMsg();return; });
-      // alert('te' + JSON.stringify(te));
-      await this.goServer(te).catch(() => { this.loading = false; this.errorMsg();return; });
-      // alert('将要删除的内容3' + JSON.stringify(te));
-      await this.delete(this.tempParams).catch(() => { this.loading = false; this.errorMsg();return; });
-      // alert(4);
-      const toast = await this.toastController.create({
-        color: 'dark',
-        duration: 3000,
-        message: '数据上传成功',
-        showCloseButton: false,
-        position: 'middle'
-      });
-      await toast.present();
-      await this.num++;
->>>>>>> 941c02e40af36d233f347f2700a6d44939877563
     }
     this.loading = false;
   }
@@ -371,6 +349,35 @@ export class Tab2Page {
   }
 
   /**
+   * 部分上传更新标志位
+   * @param taskInfoDto 
+   */
+  upDateStatus(taskInfoDto: TaskInfoDto): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      if (taskInfoDto.scheduleDetail.status == 2) {
+        // alert('in');
+        this.sqlite.create({
+          name: 'taskDB.db',
+          location: 'default'
+        }).then((db: SQLiteObject) => {
+          db.executeSql('update scheduleDetail set isUpload=1 where id=?'
+            , [taskInfoDto.scheduleDetail.id]).then(() => {
+              taskInfoDto.scheduleDetail.isUpload = 1;
+              this.tempParams = taskInfoDto;
+              // alert(JSON.stringify(taskInfoDto.scheduleDetail));
+              resolve(taskInfoDto);
+            }).catch((e) => {
+              alert('更新上传标志位异常' + JSON.stringify(e));
+              reject('更新上传标志位异常');
+            });
+        });
+      } else {
+        resolve(taskInfoDto);
+      }
+    });
+  }
+
+  /**
    * 查询烟农
    * @param taskInfoDto 
    */
@@ -400,33 +407,38 @@ export class Tab2Page {
    */
   delete(taskInfo: TaskInfoDto): Promise<boolean> {
     return new Promise<any>((resolve, reject) => {
-      this.sqlite.create({
-        name: 'taskDB.db',
-        location: 'default'
-      }).then((db: SQLiteObject) => {
-        const promises = [];
-        taskInfo.growerAreaRecordList.forEach(function (gar) {
-          promises.push(db.executeSql('delete from growerAreaRecords where id =?', [gar.id]));
-        });
-        taskInfo.visitExamineList.forEach(function (ve) {
-          promises.push(db.executeSql('delete from visitExamine where id =?', [ve.id]));
-        });
-        taskInfo.visitRecordList.forEach(function (vr) {
-          promises.push(db.executeSql('delete from visitRecord where id =?', [vr.id]));
-        });
-        promises.push(db.executeSql('delete from scheduleDetail where id =?', [taskInfo.scheduleDetail.id]));
-        Promise.all(promises).then((pro) => {
-          // alert('删除完成' + JSON.stringify(pro));
-          resolve(true);
-        }).catch((pro) => {
+      // alert(taskInfo.scheduleDetail.status);
+      if (taskInfo.scheduleDetail.status == 3) {
+        this.sqlite.create({
+          name: 'taskDB.db',
+          location: 'default'
+        }).then((db: SQLiteObject) => {
+          const promises = [];
+          taskInfo.growerAreaRecordList.forEach(function (gar) {
+            promises.push(db.executeSql('delete from growerAreaRecords where id =?', [gar.id]));
+          });
+          taskInfo.visitExamineList.forEach(function (ve) {
+            promises.push(db.executeSql('delete from visitExamine where id =?', [ve.id]));
+          });
+          taskInfo.visitRecordList.forEach(function (vr) {
+            promises.push(db.executeSql('delete from visitRecord where id =?', [vr.id]));
+          });
+          promises.push(db.executeSql('delete from scheduleDetail where id =?', [taskInfo.scheduleDetail.id]));
+          Promise.all(promises).then((pro) => {
+            // alert('删除完成' + JSON.stringify(pro));
+            resolve(true);
+          }).catch((pro) => {
+            reject(false);
+            alert('删除失败' + JSON.stringify(pro));
+          });
+        }).catch((e) => {
           reject(false);
-          alert('删除失败' + JSON.stringify(pro));
+          alert('打开数据库失败' + JSON.stringify(e));
+          reject('打开数据库失败');
         });
-      }).catch((e) => {
-        reject(false);
-        alert('打开数据库失败' + JSON.stringify(e));
-        reject('打开数据库失败');
-      });
+      } else {
+        resolve(true);
+      }
     });
   }
 

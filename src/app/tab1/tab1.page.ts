@@ -344,8 +344,8 @@ export class Tab1Page {
             }
           } else {
             // alert('scheduleDetail 2');
-            db.executeSql('INSERT INTO scheduleDetail(id,taskId,scheduleId,employeeId,growerId,visitNum,completeNum,status,scheduleTaskId,employeeName,growerName,creationTime) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
-              , [v.id, v.taskId, v.scheduleId, v.employeeId, v.growerId, v.visitNum, v.completeNum, v.status, v.scheduleTaskId, v.employeeName, v.growerName, v.creationTime]).catch(e => {
+            db.executeSql('INSERT INTO scheduleDetail(id,taskId,scheduleId,employeeId,growerId,visitNum,completeNum,status,scheduleTaskId,employeeName,growerName,creationTime,isUpload) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'
+              , [v.id, v.taskId, v.scheduleId, v.employeeId, v.growerId, v.visitNum, v.completeNum, v.status, v.scheduleTaskId, v.employeeName, v.growerName, v.creationTime, 0]).catch(e => {
                 alert('scheduleDetail插入异常' + JSON.stringify(e));
               });
           }
@@ -571,6 +571,7 @@ export class Tab1Page {
     // params.userId = '1926112826844702';
     params.userId = this.userInfo.id;
     await this.onLineService.getCurrentTask(params).subscribe(async (result: any) => {
+      // alert(JSON.stringify(result));
       // const dataList = result;
       this.scheduleList = Schedule.fromJSArray(result.scheduleList);
       this.scheduleDetailList = ScheduleDetail.fromJSArray(result.scheduleDetailList);
