@@ -1,5 +1,9 @@
-<ion-header>
+<ion-header style="margin-top:10px;">
     <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button>
+            </ion-back-button>
+        </ion-buttons>
         <ion-title>
             烟农详情
         </ion-title>
@@ -12,8 +16,8 @@
                 <ion-img src="assets/icon/farmer_new.png"></ion-img>
             </ion-thumbnail>
             <ion-label>
-                <h2>王家烟叶生产收购点</h2>
-                <p style="font-size: 17px;">沈星移</p>
+                <h2>{{visitGrowerDetailDto.growerInfo.unitName}}</h2>
+                <p style="font-size: 17px;">{{visitGrowerDetailDto.growerInfo.name}}</p>
             </ion-label>
         </ion-item>
     </ion-list>
@@ -22,8 +26,9 @@
             <ion-label style="color:gray;">拜访任务</ion-label>
         </ion-list-header>
         <ion-item>
-            <ion-label>2019年3月29日拜访任务-除草（技术服务）
-                <p>2019-3-29到2019-3-29已完成1次拜访共4次拜访</p>
+            <ion-label>{{visitGrowerDetailDto.taskTitle}}
+                <p>{{visitGrowerDetailDto.beginTime | date:'yyyy-MM-dd'}} 到
+                    {{visitGrowerDetailDto.endTime | date:'yyyy-MM-dd'}} {{visitGrowerDetailDto.footer}}</p>
             </ion-label>
         </ion-item>
     </ion-list>
@@ -33,32 +38,63 @@
         </ion-list-header>
         <ion-item>
             <ion-label>烟农地址
-                <p>四川省成都市高新区天府大道中段560号</p>
+                <p>{{visitGrowerDetailDto.growerInfo.address}}</p>
             </ion-label>
         </ion-item>
         <ion-item>
             <ion-label>联系电话</ion-label>
-            <ion-note slot="end">18161222015</ion-note>
+            <ion-note slot="end">{{visitGrowerDetailDto.growerInfo.tel}}</ion-note>
         </ion-item>
         <ion-item>
             <ion-label>约定种植面积</ion-label>
-            <ion-note slot="end">50亩</ion-note>
+            <ion-note slot="end">{{visitGrowerDetailDto.growerInfo.plantingArea}}亩</ion-note>
         </ion-item>
-        <ion-item>
-            <ion-label>落实面积</ion-label>
-            <ion-note slot="end">10亩</ion-note>
+        <ion-item *ngIf="visitGrowerDetailDto.growerInfo.actualArea">
+            <ion-label>核实面积</ion-label>
+            <ion-note slot="end">{{visitGrowerDetailDto.growerInfo.actualArea}}亩</ion-note>
         </ion-item>
     </ion-list>
-    <ion-list lines="none">
+    <ion-list lines="none" *ngIf="visitGrowerDetailDto.taskType != 5">
         <ion-list-header>
-            <ion-label style="color:gray;">拜访记录（本任务还差3次）</ion-label>
+            <ion-label style="color:gray;">
+                拜访记录（{{(visitGrowerDetailDto.visitNum - visitGrowerDetailDto.completeNum) <= 0? "全部完成" : "本任务还差"+(visitGrowerDetailDto.visitNum - visitGrowerDetailDto.completeNum)+"次"}}）
+            </ion-label>
         </ion-list-header>
-        <ion-item (click)="goDetail()">
+        <ion-item *ngIf="visitGrowerDetailDto.visitRecords.length == 0">
+            <p style="text-align: center;font-size: 14px;color: gray;">还没有拜访记录</p>
+        </ion-item>
+        <ion-item *ngFor="let item of visitGrowerDetailDto.visitRecords" (click)="goDetail(item.id)">
             <ion-thumbnail slot="start">
-                <ion-img src="assets/icon/farmer_new.png"></ion-img>
+                <ion-img *ngIf="item.isOnline === 1" src="assets/icon/farmer_new.png"></ion-img>
+                <ion-img *ngIf="item.isOnline === 0" [src]="'data:image/jpeg;base64,'+ item.imgPath"></ion-img>
             </ion-thumbnail>
-            <ion-label>2019-3-29 14:42
-                <p>四川省成都市高新区天府大道中段560号</p>
+            <ion-label>{{item.signTime | date:'yyyy-MM-dd  HH:mm:ss'}}
+                <p>{{item.location}}</p>
+            </ion-label>
+            <!-- <ion-note slot="end">详细</ion-note> -->
+            <ion-avatar style="margin-bottom:0px;" slot="end">
+                <img style="width:30px;height:30px;" src="assets/icon/extra.png">
+            </ion-avatar>
+        </ion-item>
+    </ion-list>
+    <ion-list lines="none" *ngIf="visitGrowerDetailDto.taskType == 5">
+        <ion-list-header>
+            <ion-label style="color:gray;">
+                面积核实记录
+            </ion-label>
+        </ion-list-header>
+        <ion-item *ngIf="visitGrowerDetailDto.visitRecords.length == 0">
+            <p style="text-align: center;font-size: 14px;color: gray;">当前任务还没有记录，点击新增采集</p>
+        </ion-item>
+        <ion-item *ngFor="let item of visitGrowerDetailDto.visitRecords" (click)="goAreaDetail(item.id)">
+            <ion-thumbnail slot="start">
+                <ion-img *ngIf="item.isOnline === 1" src="assets/icon/farmer_new.png"></ion-img>
+                <ion-img *ngIf="item.isOnline === 0" [src]="'data:image/jpeg;base64,'+ item.imgPath">
+                </ion-img>
+            </ion-thumbnail>
+            <ion-label>{{item.signTime | date:'yyyy-MM-dd  HH:mm:ss'}}
+                <p>{{item.location}}</p>
+                <p>{{item.area}}亩</p>
             </ion-label>
             <!-- <ion-note slot="end">详细</ion-note> -->
             <ion-avatar style="margin-bottom:0px;" slot="end">
@@ -67,9 +103,18 @@
         </ion-item>
     </ion-list>
     <div>
-        <ion-button color="light" expand="block" (click)="goArea()">新增</ion-button>
-        <ion-button expand="block" (click)="subArea()">提交落实面积</ion-button>
-        <ion-button expand="block" (click)="goVisit()">去拜访</ion-button>
-        <ion-button color="light" expand="block">采集烟农位置（剩余1次）</ion-button>
+        <div *ngIf="visitGrowerDetailDto.scheduleStatus === 1 || visitGrowerDetailDto.scheduleStatus === 2">
+            <ion-button *ngIf="isGetPosition && visitGrowerDetailDto.taskType !== 5" expand="block" (click)="goVisit()">
+                {{goVisitMsg}}</ion-button>
+            <ion-button *ngIf="visitGrowerDetailDto.taskType === 5" color="light" expand="block" (click)="goArea()">新增
+            </ion-button>
+            <ion-button *ngIf="visitGrowerDetailDto.taskType === 5"
+                disabled="{{visitGrowerDetailDto.visitRecords.length === 0? true : false}}" expand="block"
+                (click)="subArea()">提交核实面积
+            </ion-button>
+        </div>
+        <ion-button *ngIf="showPosition && lastNum>0" (click)="location()" color="light" expand="block">
+            采集烟农位置{{lastNum==0?'':'(剩余'+lastNum+'次)'}}
+        </ion-button>
     </div>
 </ion-content>

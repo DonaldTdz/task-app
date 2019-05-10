@@ -1,5 +1,9 @@
-<ion-header>
+<ion-header style="margin-top:10px;">
     <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button>
+            </ion-back-button>
+        </ion-buttons>
         <ion-title>
             任务拜访
         </ion-title>
@@ -12,18 +16,19 @@
                 <h2>拜访对象</h2>
             </ion-label>
             <ion-note style="padding-top:0px;padding-bottom:0px;" slot="end">
-                <h6>沈星移</h6>
+                <h6>{{visitRecordInputDto.growerName}}</h6>
             </ion-note>
         </ion-item>
         <ion-item>
             <ion-label>
                 <h2>拜访内容</h2>
-                <p>除草任务（技术服务），除草任务</p>
+                <p>{{visitRecordInputDto.taskDesc}}</p>
             </ion-label>
         </ion-item>
-        <ion-item>
+        <ion-item (click)="location()">
             <ion-label>
                 <h2 style="color:rgb(135,167,214);">点击获取所在位置</h2>
+                <p>{{showMessage}}</p>
             </ion-label>
             <ion-avatar style="margin-bottom:0px;" slot="start">
                 <img style="width:30px;height:30px;" src="assets/icon/location.png">
@@ -34,9 +39,16 @@
                 <h2>拍照</h2>
                 <p>最多可采集3张照片</p>
             </ion-label>
-            <ion-avatar style="margin-bottom:0px;" slot="end">
+            <ion-avatar (click)="goCamera()" style="margin-bottom:0px;" slot="end">
                 <img style="width:30px;height:30px;" src="assets/icon/photo.png">
             </ion-avatar>
+        </ion-item>
+    </ion-list>
+    <ion-list lines="none" *ngIf="photos.length>0">
+        <ion-item>
+            <ion-col style="margin:0px;padding:0px;" *ngFor="let item of photos">
+                <ion-img style="width:60px;height:60px;" [src]="'data:image/jpeg;base64,'+ item"></ion-img>
+            </ion-col>
         </ion-item>
     </ion-list>
     <ion-list lines="none">
@@ -45,7 +57,46 @@
                 <h2>考核列表</h2>
             </ion-label>
         </ion-item>
-        <ion-radio-group>
+        <ion-radio-group *ngFor="let item of visitRecordInputDto.examines; let i = index" [(ngModel)]="item.score">
+            <ion-list-header>
+                <ion-label>{{i+1}}.{{item.name}}（{{item.desc}}）</ion-label>
+            </ion-list-header>
+            <div *ngIf="item.examineOption == 1">
+                <ion-item>
+                    <ion-label>优</ion-label>
+                    <ion-radio slot="start" value=5 checked="{{item.score == 5}}"></ion-radio>
+                </ion-item>
+                <ion-item>
+                    <ion-label>合格</ion-label>
+                    <ion-radio slot="start" value=3 checked="{{item.score == 3}}"></ion-radio>
+                </ion-item>
+                <ion-item>
+                    <ion-label>差</ion-label>
+                    <ion-radio slot="start" value=1 checked="{{item.score == 1}}"></ion-radio>
+                </ion-item>
+            </div>
+            <div *ngIf="item.examineOption == 2">
+                <ion-item>
+                    <ion-label>到位</ion-label>
+                    <ion-radio slot="start" value=5 checked="{{item.score == 5}}"></ion-radio>
+                </ion-item>
+                <ion-item>
+                    <ion-label>不到位</ion-label>
+                    <ion-radio slot="start" value=1 checked="{{item.score == 3}}"></ion-radio>
+                </ion-item>
+            </div>
+            <div *ngIf="item.examineOption == 3">
+                <ion-item>
+                    <ion-label>了解</ion-label>
+                    <ion-radio slot="start" value=5 checked="{{item.score == 5}}"></ion-radio>
+                </ion-item>
+                <ion-item>
+                    <ion-label>不了解</ion-label>
+                    <ion-radio slot="start" value=1 checked="{{item.score == 3}}"></ion-radio>
+                </ion-item>
+            </div>
+        </ion-radio-group>
+        <!-- <ion-radio-group>
             <ion-list-header>
                 <ion-label>1.烟叶除草项目（每日除草考核项）</ion-label>
             </ion-list-header>
@@ -61,15 +112,16 @@
                 <ion-label>差</ion-label>
                 <ion-radio slot="start" value="buford"></ion-radio>
             </ion-item>
-        </ion-radio-group>
+        </ion-radio-group> -->
     </ion-list>
     <ion-list lines="none">
         <ion-item>
             <ion-label position="stacked">备注</ion-label>
-            <ion-textarea maxlength=500 placeholder="备注"></ion-textarea>
+            <ion-textarea [(ngModel)]="visitRecordInputDto.desc" maxlength=500 placeholder="备注">
+            </ion-textarea>
         </ion-item>
     </ion-list>
     <div>
-        <ion-button expand="block">提交</ion-button>
+        <ion-button expand="block" (click)="save()">提交</ion-button>
     </div>
 </ion-content>

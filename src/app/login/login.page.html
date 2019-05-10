@@ -1,0 +1,29 @@
+<ion-header style="margin-top:10px;">
+    <ion-toolbar>
+        <ion-title>
+            员工登录
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <div style="margin-top:10%;">
+        <ion-list lines="full" class="ion-no-margin ion-no-padding">
+            <ion-item>
+                <ion-label position="stacked">账号<ion-text color="danger">*</ion-text>
+                </ion-label>
+                <ion-input required type="text" [(ngModel)]="account"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label position="stacked">密码<ion-text color="danger">*</ion-text>
+                </ion-label>
+                <ion-input required type="password" [(ngModel)]="password"></ion-input>
+            </ion-item>
+        </ion-list>
+        <div class="ion-padding">
+            <ion-button expand="block" disabled="{{loading == true || (password.length < 3 || account.length < 3)}}"
+                (click)="login()" class="ion-no-margin">登录
+            </ion-button>
+        </div>
+        <p style="text-align:center;color:gray;font-size:14px;">注：登录账号,密码请前往钉钉应用“任务拜访”进行查看</p>
+    </div>
+</ion-content>

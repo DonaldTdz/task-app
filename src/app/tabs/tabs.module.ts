@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { TabsPageRoutingModule } from './tabs.router.module';
 
 import { TabsPage } from './tabs.page';
+import { SQLite } from '@ionic-native/sqlite/ngx';
+import { UserInfoService } from 'src/services';
 
 @NgModule({
   imports: [
@@ -14,6 +16,7 @@ import { TabsPage } from './tabs.page';
     FormsModule,
     TabsPageRoutingModule
   ],
-  declarations: [TabsPage]
+  declarations: [TabsPage],
+  providers: [SQLite, UserInfoService]
 })
-export class TabsPageModule {}
+export class TabsPageModule { }

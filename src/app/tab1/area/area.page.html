@@ -1,7 +1,11 @@
-<ion-header>
+<ion-header style="margin-top:10px;">
     <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button>
+            </ion-back-button>
+        </ion-buttons>
         <ion-title>
-            面积落实
+            面积核实
         </ion-title>
     </ion-toolbar>
 </ion-header>
@@ -12,12 +16,13 @@
                 <h2>采集烟农</h2>
             </ion-label>
             <ion-note style="padding-top:0px;padding-bottom:0px;" slot="end">
-                <h6>沈星移</h6>
+                <h6>{{growerName}}</h6>
             </ion-note>
         </ion-item>
-        <ion-item>
+        <ion-item (click)="location()">
             <ion-label>
                 <h2 style="color:rgb(135,167,214);">点击获取所在位置</h2>
+                <p>{{showMessage}}</p>
             </ion-label>
             <ion-avatar style="margin-bottom:0px;" slot="start">
                 <img style="width:30px;height:30px;" src="assets/icon/location.png">
@@ -31,15 +36,21 @@
                 <h2>拍照</h2>
                 <p>最多可采集3张照片</p>
             </ion-label>
-            <ion-avatar style="margin-bottom:0px;" slot="end">
+            <ion-avatar (click)="goCamera()" style="margin-bottom:0px;" slot="end">
                 <img style="width:30px;height:30px;" src="assets/icon/photo.png">
             </ion-avatar>
+        </ion-item>
+        <ion-item *ngIf="photos.length > 0">
+            <ion-col style="margin:0px;padding:0px;" *ngFor="let item of photos">
+                <ion-img style="width:40px;height:40px;" [src]="'data:image/jpeg;base64,'+ item"></ion-img>
+            </ion-col>
         </ion-item>
         <ion-item>
             <ion-label>
                 <h2>面积（亩）</h2>
             </ion-label>
-            <ion-input placeholder="输入落实面积"></ion-input>
+            <ion-input type="number" inputmode="numeric" [(ngModel)]="areaRecordInput.area" placeholder="输入核实面积">
+            </ion-input>
         </ion-item>
         <ion-item>
             <ion-label>
@@ -50,10 +61,10 @@
     <ion-list lines="none">
         <ion-item>
             <ion-label position="stacked">备注</ion-label>
-            <ion-textarea maxlength=500 placeholder="输入备注"></ion-textarea>
+            <ion-textarea [(ngModel)]="areaRecordInput.remark" maxlength=500 placeholder="输入备注"></ion-textarea>
         </ion-item>
     </ion-list>
     <div>
-        <ion-button expand="block">新增</ion-button>
+        <ion-button expand="block" (click)="save()">新增</ion-button>
     </div>
 </ion-content>
