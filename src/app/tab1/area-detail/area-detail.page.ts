@@ -49,7 +49,7 @@ export class AreaDetailPage {
                     }
                     // alert(JSON.stringify(this.areaRecordDto));
                 }).catch((e) => {
-                    alert('面积落实详情异常信息' + JSON.stringify(e));
+                    alert('面积核实详情异常信息' + JSON.stringify(e));
                 });
         })
     }
@@ -75,12 +75,12 @@ export class AreaDetailPage {
                                     // if (res.rows.length > 0) {
                                     //     this.areaRecordDto = AreaRecordDto.fromJS(res.rows.item(0));
                                     // } else {
-                                    //     alert('未获取到面积落实详情');
+                                    //     alert('未获取到面积核实详情');
                                     // }
                                     // alert(JSON.stringify(res));
                                     this.navCtrl.pop();
                                 }).catch((e) => {
-                                    //    await alert('面积落实删除异常信息' + JSON.stringify(e));
+                                    //    await alert('面积核实删除异常信息' + JSON.stringify(e));
                                 })
                         })
                     }

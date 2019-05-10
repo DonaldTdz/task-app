@@ -31,7 +31,7 @@ export class VisitRecordInputDto {
         } else if (this.taskType === 4) {
             return '临时任务';
         } else if (this.taskType === 5) {
-            return '面积落实';
+            return '面积核实';
         } else {
             return '其他';
         }

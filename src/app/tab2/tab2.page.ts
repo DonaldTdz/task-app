@@ -253,7 +253,7 @@ export class Tab2Page {
         location: 'default'
       }).then((db: SQLiteObject) => {
         const promises = [];
-        //查询面积落实
+        //查询面积核实
         promises.push(db.executeSql('select * from growerAreaRecords where scheduleDetailId =?and isOnline = 0'
           , [taskInfo.scheduleDetail.id]).then((gar) => {
             if (gar.rows.length > 0) {
@@ -261,8 +261,8 @@ export class Tab2Page {
             }
             return true;
           }).catch((e) => {
-            alert('面积落实记录上传失败' + JSON.stringify(e));
-            reject('面积落实记录上传失败');
+            alert('面积核实记录上传失败' + JSON.stringify(e));
+            reject('面积核实记录上传失败');
           }));
         //查询拜访任务
         promises.push(db.executeSql('select * from visitRecord where scheduleDetailId =? and isOnline = 0', [taskInfo.scheduleDetail.id]).then((vr) => {

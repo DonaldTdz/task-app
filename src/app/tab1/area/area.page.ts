@@ -197,7 +197,7 @@ export class AreaPage {
                                         this.navCtrl.pop();
                                     })
                                 }).catch((e) => {
-                                    alert('面积落实记录新增异常信息' + JSON.stringify(e));
+                                    alert('面积核实记录新增异常信息' + JSON.stringify(e));
                                 })
                         }).catch((e) => {
                             alert('计划详情更新异常信息' + JSON.stringify(e));

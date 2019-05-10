@@ -50,7 +50,7 @@
             <ion-note slot="end">{{visitGrowerDetailDto.growerInfo.plantingArea}}亩</ion-note>
         </ion-item>
         <ion-item *ngIf="visitGrowerDetailDto.growerInfo.actualArea">
-            <ion-label>落实面积</ion-label>
+            <ion-label>核实面积</ion-label>
             <ion-note slot="end">{{visitGrowerDetailDto.growerInfo.actualArea}}亩</ion-note>
         </ion-item>
     </ion-list>
@@ -80,7 +80,7 @@
     <ion-list lines="none" *ngIf="visitGrowerDetailDto.taskType == 5">
         <ion-list-header>
             <ion-label style="color:gray;">
-                面积落实记录
+                面积核实记录
             </ion-label>
         </ion-list-header>
         <ion-item *ngIf="visitGrowerDetailDto.visitRecords.length == 0">
@@ -110,7 +110,7 @@
             </ion-button>
             <ion-button *ngIf="visitGrowerDetailDto.taskType === 5"
                 disabled="{{visitGrowerDetailDto.visitRecords.length === 0? true : false}}" expand="block"
-                (click)="subArea()">提交落实面积
+                (click)="subArea()">提交核实面积
             </ion-button>
         </div>
         <ion-button *ngIf="showPosition && lastNum>0" (click)="location()" color="light" expand="block">

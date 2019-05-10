@@ -108,7 +108,7 @@ export class VisitPage {
                                                                 }
                                                                 // alert(JSON.stringify(this.visitGrowerDetailDto.visitRecords));
                                                             }).catch((e) => {
-                                                                alert('落实面积记录异常信息' + JSON.stringify(e));
+                                                                alert('核实面积记录异常信息' + JSON.stringify(e));
                                                             });
                                                     } else {
                                                         db.executeSql('select * from visitRecord v where v.ScheduleDetailId = ? order by v.CreationTime'
@@ -184,7 +184,7 @@ export class VisitPage {
     async subArea() {
         const alert = await this.alertController.create({
             header: '确认!',
-            message: '确定提交面积采落实数据，提交后将不可修改',
+            message: '确定提交面积采核实数据，提交后将不可修改',
             buttons: [
                 {
                     text: '取消',
@@ -250,7 +250,7 @@ export class VisitPage {
                             this.getVisitGrowerDetail();
                         })
                 }).catch((e) => {
-                    alert('烟农落实异常信息' + JSON.stringify(e));
+                    alert('烟农核实异常信息' + JSON.stringify(e));
                 });
         });
     }
