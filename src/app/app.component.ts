@@ -56,9 +56,9 @@ export class AppComponent {
           }).then(() => {
             db.executeSql('create table if not exists growerLocationLogs(id varchar(36) PRIMARY KEY not null,employeeId nvarchar(50),growerId int not null,longitude decimal(2,0),latitude decimal(2,0),creationTime DateTime,isOnline int);', [])
           }).then(() => {
-            db.executeSql('CREATE TABLE IF NOT EXISTS systemData (id VARCHAR ( 36 ) PRIMARY KEY NOT NULL,modelId INT,type INT NOT NULL,code nvarchar ( 50 ) NOT NULL,DESC nvarchar ( 500 ),remark nvarchar ( 500 ),seq INT,creationTime DateTime );', [])
+            db.executeSql('CREATE TABLE IF NOT EXISTS systemData (id VARCHAR (36) PRIMARY KEY NOT NULL,modelId INT,type INT NOT NULL,code nvarchar (50) NOT NULL,DESC nvarchar (500),remark nvarchar (500),seq INT,creationTime DateTime );', [])
           }).then(() => {
-            db.executeSql('CREATE TABLE IF NOT EXISTS employee (id VARCHAR ( 50 ) PRIMARY KEY NOT NULL,name VARCHAR ( 50 ),department VARCHAR (300),position VARCHAR ( 100 ),areaCode int,area VARCHAR ( 50 ));', [])
+            db.executeSql('CREATE TABLE IF NOT EXISTS employee (id VARCHAR (50) PRIMARY KEY NOT NULL,name VARCHAR (50),department VARCHAR (300),position VARCHAR (100),areaCode int,area VARCHAR (50));', [])
           })
       });
     }

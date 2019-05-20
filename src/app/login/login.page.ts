@@ -119,9 +119,10 @@ export class LoginPage {
                             reject('用户信息新增失败');
                         });
                     }
-                }).catch((e) => {
-                    alert(JSON.stringify(e));
                 })
+                // .catch((e) => {
+                //     alert(JSON.stringify(e));
+                // })
 
             }).catch((e) => {
                 // alert('打开数据库失败' + JSON.stringify(e));

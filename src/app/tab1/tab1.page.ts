@@ -589,10 +589,10 @@ export class Tab1Page {
   }
 
   getData() {
-    this.sqlite.deleteDatabase({
-      name: 'taskDB.db',
-      location: 'default'
-    }).then((db: SQLiteObject) => { })
+    // this.sqlite.deleteDatabase({
+    //   name: 'taskDB.db',
+    //   location: 'default'
+    // }).then((db: SQLiteObject) => { })
     // this.sqlite.create({
     //   name: 'taskDB.db',
     //   location: 'default'
@@ -600,7 +600,7 @@ export class Tab1Page {
     //   .then((db: SQLiteObject) => {
     //     db.executeSql('select * from employee', [])
     //       .then((res) => {
-    //         alert(JSON.stringify(res));
+    //         alert(JSON.stringify(res.area + res.id));
     //         // alert(JSON.stringify(res.rows.item(0).location));
     //         // alert(JSON.stringify(res.rows.item(1).location));
     //         // alert(JSON.stringify(res.rows.item(2).location));
