@@ -38,9 +38,10 @@ export class LoginPage {
                 if (e.rows.length > 0) {
                     this.navCtrl.navigateBack(['/tabs/tab1']);
                 }
-            }).catch((e) => {
-                alert(JSON.stringify(e));
             })
+            // .catch((e) => {
+            //     alert(JSON.stringify(e));
+            // })
 
         }).catch((e) => {
             // alert('打开数据库失败' + JSON.stringify(e));
@@ -118,9 +119,10 @@ export class LoginPage {
                             reject('用户信息新增失败');
                         });
                     }
-                }).catch((e) => {
-                    alert(JSON.stringify(e));
                 })
+                // .catch((e) => {
+                //     alert(JSON.stringify(e));
+                // })
 
             }).catch((e) => {
                 // alert('打开数据库失败' + JSON.stringify(e));
